@@ -1,0 +1,2607 @@
+/* ===== v72 EKRAN ARAYÜZÜ (yeniden tasarlandı) ===== */
+/* ============================================================
+   Akıllı Fiyat Sihirbazı — v72 arayüz teması
+   "Operasyon konsolu": açık, sakin, sayı odaklı, tek vurgu rengi.
+   Not: Kargo etiketi ve @media print blokları AYNEN korunmuştur
+   (dosyanın alt kısmı). Burası yalnızca ekran arayüzüdür.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+:root{
+  --bg:#F4F3EF;
+  --surface:#FFFFFF;
+  --surface-2:#FAF9F6;
+  --surface-3:#F1EFEA;
+  --ink:#17181C;
+  --ink-2:#3A3D45;
+  --muted:#71757F;
+  --faint:#9AA0AA;
+  --line:#E5E3DC;
+  --line-2:#D9D6CD;
+
+  --accent:#2C43F0;
+  --accent-ink:#1B2ACC;
+  --accent-soft:#EBEDFE;
+  --accent-2:#0E9F6E;
+
+  --ok:#0E9F6E;
+  --ok-soft:#E3F6EE;
+  --warn:#B45309;
+  --warn-soft:#FBF0E2;
+  --bad:#DB2A45;
+  --bad-soft:#FCE7EB;
+
+  --text:var(--ink);
+  --card:var(--surface);
+
+  --radius:14px;
+  --radius-sm:10px;
+  --radius-lg:20px;
+  --shadow-sm:0 1px 2px rgba(23,24,28,.05), 0 1px 1px rgba(23,24,28,.04);
+  --shadow:0 6px 24px -12px rgba(23,24,28,.18), 0 2px 6px -3px rgba(23,24,28,.08);
+  --shadow-lg:0 24px 60px -28px rgba(23,24,28,.28);
+  --ring:0 0 0 3px rgba(44,67,240,.16);
+
+  --display:"Space Grotesk", "Inter", system-ui, sans-serif;
+  --body:"Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+*{box-sizing:border-box}
+
+html{-webkit-text-size-adjust:100%}
+
+body{
+  margin:0;
+  min-height:100vh;
+  font-family:var(--body);
+  color:var(--ink);
+  background:
+    radial-gradient(1200px 480px at 88% -6%, rgba(44,67,240,.06), transparent 60%),
+    radial-gradient(900px 420px at -6% 4%, rgba(14,159,110,.05), transparent 55%),
+    var(--bg);
+  padding:32px 28px 56px;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  font-size:15px;
+  line-height:1.5;
+}
+body::before,body::after{display:none!important;content:none}
+
+::selection{background:rgba(44,67,240,.18)}
+
+/* ---------- Kullanıcı kapısı ---------- */
+.userGate{max-width:640px;margin:9vh auto 0;position:relative;z-index:3}
+.userPanel{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-lg);
+  padding:34px 32px 30px;
+  position:relative;
+  overflow:hidden;
+}
+.userPanel::before{
+  content:"AKILLI FİYAT SİHİRBAZI";
+  display:block;
+  font-family:var(--display);
+  font-size:11px;
+  letter-spacing:.22em;
+  font-weight:600;
+  color:var(--accent);
+  margin-bottom:14px;
+}
+.userPanel h2{
+  font-family:var(--display);
+  font-size:clamp(24px,3.4vw,34px);
+  line-height:1.06;
+  margin:0 0 6px;
+  font-weight:700;
+  letter-spacing:-.02em;
+  color:var(--ink);
+}
+.userPanel h2 + *{margin-top:22px}
+.userGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.userGrid button{
+  cursor:pointer;text-align:left;
+  font-family:var(--body);
+  font-weight:600;font-size:15px;
+  color:var(--ink);
+  background:var(--surface-2);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:15px 16px;
+  transition:transform .12s ease, border-color .12s ease, background .12s ease, box-shadow .12s ease;
+  position:relative;
+}
+.userGrid button::after{
+  content:"→";
+  position:absolute;right:15px;top:50%;transform:translateY(-50%);
+  color:var(--faint);font-weight:700;opacity:0;transition:.14s ease;
+}
+.userGrid button:hover{
+  background:var(--surface);
+  border-color:var(--accent);
+  box-shadow:var(--ring);
+  transform:translateY(-1px);
+}
+.userGrid button:hover::after{opacity:1;right:13px;color:var(--accent)}
+
+.appHidden{display:none!important}
+.hide{display:none!important}
+
+/* ---------- Üst çubuk ---------- */
+.wrap{width:min(100%,1440px);margin:0 auto;position:relative;z-index:2}
+.top{display:grid;grid-template-columns:auto minmax(0,1fr);gap:22px;align-items:center;margin-bottom:24px}
+h1{
+  font-family:var(--display);
+  font-size:clamp(21px,2.4vw,30px);
+  line-height:1.05;margin:0;
+  font-weight:700;letter-spacing:-.02em;white-space:nowrap;color:var(--ink);
+}
+.top h1::before{
+  content:"";display:inline-block;vertical-align:-2px;
+  width:9px;height:22px;margin-right:12px;border-radius:3px;
+  background:linear-gradient(180deg,var(--accent),var(--accent-2));
+}
+
+.topRight{display:flex;align-items:center;justify-content:flex-end;gap:10px;min-width:0;flex-wrap:wrap}
+.topRates{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;min-width:0}
+.topRate{
+  border:1px solid var(--line);background:var(--surface);border-radius:999px;
+  padding:8px 14px;color:var(--muted);font-size:13px;font-weight:600;white-space:nowrap;
+  box-shadow:var(--shadow-sm);
+}
+.topRate b{color:var(--ink);margin-left:6px;font-variant-numeric:tabular-nums;font-family:var(--display)}
+
+.topConverter{
+  display:flex;align-items:center;gap:6px;border:1px solid var(--line);
+  background:var(--surface);border-radius:999px;padding:5px 7px;color:var(--ink-2);
+  font-size:12px;font-weight:600;white-space:nowrap;max-width:100%;box-shadow:var(--shadow-sm);
+}
+.topConverter input{
+  width:82px;height:34px;padding:0 12px;border:1px solid var(--line-2);border-radius:999px;
+  background:var(--surface-2);color:var(--ink);font-size:13px;font-weight:600;outline:none;
+  font-variant-numeric:tabular-nums;
+}
+.topConverter input:focus{border-color:var(--accent);box-shadow:var(--ring)}
+.topConverter select{
+  height:34px;padding:0 26px 0 12px;border:1px solid var(--line-2);border-radius:999px;
+  background:var(--surface-2)
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%2371757F' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>")
+    no-repeat right 10px center;
+  color:var(--ink);font-size:12px;font-weight:600;outline:none;appearance:none;-webkit-appearance:none;cursor:pointer;
+}
+.topConverter select:focus{border-color:var(--accent);box-shadow:var(--ring)}
+.topConverter select option{background:var(--surface);color:var(--ink)}
+.topConverter .fxArrow{color:var(--faint);font-weight:700}
+.topConverter .fxResult{min-width:84px;text-align:right;color:var(--ink);font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;font-family:var(--display)}
+.topConverter .fxSwap{
+  width:34px;height:34px;min-height:0;padding:0;border:1px solid var(--line-2);border-radius:999px;
+  background:var(--surface-2);color:var(--ink-2);font-size:15px;line-height:1;cursor:pointer;transition:.12s ease;
+  display:inline-flex;align-items:center;justify-content:center;flex:none;
+}
+.topConverter .fxSwap:hover{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+
+.welcomeChip{
+  display:flex;align-items:center;gap:10px;border:1px solid var(--line);
+  background:var(--surface);border-radius:999px;padding:6px 6px 6px 14px;color:var(--ink-2);
+  font-size:13px;font-weight:600;white-space:nowrap;box-shadow:var(--shadow-sm);
+}
+.welcomeChip b{color:var(--ink)}
+.welcomeChip button{
+  width:auto;border-radius:999px;padding:7px 12px;font-size:12px;font-weight:600;
+  background:var(--surface-3);color:var(--ink-2);border:1px solid var(--line);cursor:pointer;transition:.12s ease;
+}
+.welcomeChip button:hover{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+
+.pill{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:9px 13px;color:var(--muted);font-size:13px;white-space:nowrap}
+
+/* Eski döviz barı gizli */
+.rateBar{display:none}
+.rateItem{border:1px solid var(--line);background:var(--surface);border-radius:var(--radius);padding:12px 14px;min-height:72px}
+.rateItem span{display:block;color:var(--muted);font-size:12px;font-weight:600;margin-bottom:6px}
+.rateItem b{font-size:18px;font-family:var(--display);font-variant-numeric:tabular-nums}
+.rateItem small{display:block;color:var(--muted);font-size:12px;font-weight:500;margin-top:2px}
+.rateStatus{color:var(--muted)!important}
+
+/* ---------- Modül anahtarı ---------- */
+.moduleSwitch{display:flex;gap:8px;align-items:center;margin:0 0 18px;flex-wrap:wrap}
+.moduleSwitch button{
+  width:auto;border:1px solid var(--line);border-radius:999px;padding:10px 18px;
+  background:var(--surface);color:var(--ink-2);font-weight:600;font-size:14px;cursor:pointer;
+  transition:.14s ease;box-shadow:var(--shadow-sm);
+}
+.moduleSwitch button:hover{border-color:var(--line-2);color:var(--ink)}
+.moduleSwitch button.active{
+  background:var(--ink);color:#fff;border-color:var(--ink);box-shadow:var(--shadow);
+}
+
+/* ---------- Panel ---------- */
+.panel{
+  width:100%;
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.modulePanel{margin-bottom:22px}
+
+/* ---------- Adım sekmeleri (stepper) ---------- */
+.steps,.labelSteps{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  background:var(--surface-2);border-bottom:1px solid var(--line);
+}
+.labelSteps{grid-template-columns:repeat(5,1fr)}
+.stepTab,.labelTab{
+  padding:16px 12px;text-align:center;color:var(--muted);font-weight:600;
+  border-right:1px solid var(--line);font-size:13.5px;cursor:pointer;user-select:none;
+  transition:.14s ease;position:relative;
+}
+.stepTab:hover,.labelTab:hover{color:var(--ink);background:var(--surface)}
+.stepTab:last-child,.labelTab:last-child{border-right:0}
+.stepTab.active,.labelTab.active{
+  color:var(--accent);background:var(--surface);font-weight:700;
+}
+.stepTab.active::after,.labelTab.active::after{
+  content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--accent);
+}
+
+.body{padding:28px}
+.screen,.labelScreen{display:none}
+.screen.active,.labelScreen.active{display:block;animation:screenIn .28s ease}
+@keyframes screenIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ---------- Form temeli ---------- */
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+label{display:block;color:var(--ink-2);font-size:13px;font-weight:600;margin-bottom:8px;letter-spacing:.005em}
+
+input,select,textarea{
+  width:100%;border:1px solid var(--line-2);border-radius:var(--radius-sm);
+  background:var(--surface);color:var(--ink);padding:12px 14px;font-size:15px;
+  font-family:var(--body);outline:none;transition:border-color .12s ease, box-shadow .12s ease, background .12s ease;
+}
+/* Tüm butonların temel görünümü — native/Win98 görünümü engeller.
+   .primary / .ghost yalnızca renk verir; ölçü, font ve köşe buradan gelir. */
+button{
+  appearance:none;-webkit-appearance:none;
+  font-family:var(--body);font-size:14px;font-weight:600;line-height:1.2;
+  border:1px solid var(--line-2);border-radius:var(--radius-sm);
+  background:var(--surface);color:var(--ink);
+  padding:10px 16px;cursor:pointer;
+  transition:background .12s ease, border-color .12s ease, color .12s ease, transform .12s ease, box-shadow .12s ease;
+}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+input::placeholder,textarea::placeholder{color:var(--faint)}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:var(--ring);background:var(--surface)}
+
+input[inputmode="decimal"],#cost,#desiKnown,#miniFxAmount,input[data-format-number]{font-variant-numeric:tabular-nums;font-family:var(--display)}
+
+select{
+  appearance:none;-webkit-appearance:none;cursor:pointer;padding-right:38px;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'><path d='M1 1l5 5 5-5' stroke='%2371757F' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat:no-repeat;background-position:right 14px center;
+}
+
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+input[type=number]{-moz-appearance:textfield;appearance:textfield}
+
+textarea{min-height:128px;resize:vertical;line-height:1.55;font-size:14px}
+
+/* Segment seçiciler */
+.choice{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:4px}
+#cargoChoice,#currencyChoice{grid-template-columns:repeat(3,1fr)}
+#paymentChoice{grid-template-columns:repeat(5,1fr)}
+.choice button,.mode button,.logoChoice button,.paperChoice button{
+  cursor:pointer;font-weight:600;font-size:14px;
+  background:var(--surface);color:var(--ink-2);
+  border:1px solid var(--line-2);border-radius:var(--radius-sm);
+  padding:11px 12px;text-align:center;transition:.12s ease;
+}
+.choice button:hover,.mode button:hover,.logoChoice button:hover,.paperChoice button:hover{
+  border-color:var(--accent);color:var(--accent);background:var(--surface)
+}
+.choice button.active,.mode button.active,.logoChoice button.active,.paperChoice button.active{
+  background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 4px 12px -4px rgba(44,67,240,.5)
+}
+.mode{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px}
+.logoChoice{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}
+.paperChoice{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:4px}
+
+/* Aksiyon satırı ve butonlar */
+.actions{display:flex;justify-content:space-between;gap:12px;margin-top:26px;flex-wrap:wrap}
+.actions button{max-width:240px;cursor:pointer;font-weight:600;font-size:15px;padding:12px 20px;border-radius:var(--radius-sm);transition:.14s ease}
+.primary{
+  background:var(--accent);border:1px solid var(--accent);color:#fff;
+  box-shadow:0 6px 16px -6px rgba(44,67,240,.55);
+}
+.primary:hover{background:#2436d6;border-color:#2436d6;transform:translateY(-1px);box-shadow:0 10px 22px -8px rgba(44,67,240,.6)}
+.primary:active{transform:translateY(0)}
+.ghost{background:var(--surface);color:var(--ink-2);border:1px solid var(--line-2)}
+.ghost:hover{background:var(--surface-2);border-color:var(--ink-2);color:var(--ink)}
+
+/* ---------- Sonuç kartları ---------- */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:22px}
+.card{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:16px 16px 15px;min-height:104px;box-shadow:var(--shadow-sm);position:relative;
+  transition:border-color .12s ease, box-shadow .12s ease;
+}
+.card .k{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:10px;line-height:1.35}
+.card .v{font-size:23px;font-weight:700;font-family:var(--display);letter-spacing:-.01em;word-break:break-word;font-variant-numeric:tabular-nums;color:var(--ink)}
+.card.good{background:var(--ok-soft);border-color:#BFE9D8}
+.card.good .v{color:var(--ok)}
+.card.warn{background:var(--warn-soft);border-color:#F0DDC1}
+.card.warn .v{color:var(--warn)}
+.card.bold{background:var(--ink);border-color:var(--ink)}
+.card.bold .k{color:rgba(255,255,255,.62)}
+.card.bold .v{color:#fff}
+.tiny{font-size:11.5px;color:var(--muted);margin-top:8px;font-weight:500;line-height:1.4}
+.tlSub{font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums;font-family:var(--display)}
+.card.bold .tlSub{color:#c7ccff}
+.card.good .tlSub{color:var(--ok)}
+/* Sonuç ekranı aksiyonları: her zaman ulaşılabilir olsun (portatif) */
+.resultActions{position:sticky;bottom:0;z-index:5;background:linear-gradient(180deg,rgba(255,255,255,0),var(--surface) 30%);padding-top:14px;margin-top:20px;margin-left:-28px;margin-right:-28px;padding-left:28px;padding-right:28px;padding-bottom:4px;border-top:1px solid var(--line)}
+.card.bold .tiny{color:rgba(255,255,255,.6)}
+
+.copyable{cursor:pointer;user-select:none;transition:.12s ease;border-radius:6px}
+.copyable:hover{color:var(--accent)}
+.card.bold .copyable:hover{color:#c7ccff}
+.copyable:active{transform:scale(.99)}
+
+/* Ekstralar */
+.resultExtras{display:grid;grid-template-columns:1.15fr .85fr;gap:14px;margin:0 0 22px}
+.extraBox{border:1px solid var(--line);background:var(--surface-2);border-radius:var(--radius);padding:16px}
+.extraTitle{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:.08em}
+.currencyResultGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.currencyResult{border:1px solid var(--line);background:var(--surface);border-radius:var(--radius-sm);padding:12px}
+.currencyResult .crHead{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:10px;font-family:var(--display)}
+.currencyResult .crLine{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted);margin-top:6px}
+.currencyResult .crLine b{font-size:13px;color:var(--ink);cursor:pointer;font-variant-numeric:tabular-nums;font-family:var(--display)}
+.currencyResult .crLine b:hover{color:var(--accent)}
+.paymentNote{display:grid;gap:0}
+.paymentNote .noteLine{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;border-top:1px solid var(--line);padding:9px 0}
+.paymentNote .noteLine:first-child{border-top:0;padding-top:0}
+.paymentNote span{font-size:12.5px;color:var(--muted);font-weight:600}
+.paymentNote b{font-size:14px;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums;font-family:var(--display)}
+
+/* Satış sorusu */
+.saleQuestion{margin:18px 0 22px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
+.saleQuestion .q{font-weight:700;margin-bottom:14px;color:var(--ink);font-size:15px}
+.saleQuestion .saleBtns{display:flex;gap:10px;flex-wrap:wrap}
+.saleQuestion .saleBtns button{width:auto;min-width:140px;padding:12px 16px;border-radius:var(--radius-sm);font-weight:600;cursor:pointer;transition:.12s ease}
+.saleQuestion .yes{background:var(--ok);border:1px solid var(--ok);color:#fff}
+.saleQuestion .yes:hover{filter:brightness(.96)}
+.saleQuestion .no{background:var(--surface);border:1px solid var(--line-2);color:var(--ink-2)}
+.saleQuestion .no:hover{border-color:var(--bad);color:var(--bad)}
+
+/* ---------- Tablolar ---------- */
+.tableWrap{overflow:auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);max-height:520px}
+table{width:100%;border-collapse:collapse;min-width:720px}
+th,td{padding:12px 14px;text-align:right;border-bottom:1px solid var(--line);font-size:13.5px;white-space:nowrap;font-variant-numeric:tabular-nums}
+th:first-child,td:first-child{text-align:left;font-variant-numeric:normal}
+th{position:sticky;top:0;background:var(--surface-3);color:var(--muted);z-index:2;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+tbody tr:hover td{background:var(--surface-2)}
+tr.selected{font-weight:700;color:var(--ink)}
+tr.selected td{background:var(--ok-soft)!important}
+
+.logInfo{margin-top:10px;color:var(--muted);font-size:12.5px;font-weight:500;min-height:18px}
+.error{margin-top:12px;color:var(--bad);font-size:13px;font-weight:600;min-height:18px}
+.error:not(:empty){background:var(--bad-soft);border:1px solid #F3C9D1;border-radius:var(--radius-sm);padding:10px 12px}
+
+/* Desi önizleme */
+.desiPreview{margin-top:16px;display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.mini{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius-sm);padding:14px}
+.mini span{display:block;color:var(--muted);font-size:12px;font-weight:600;margin-bottom:6px}
+.mini b{font-size:20px;font-family:var(--display);font-variant-numeric:tabular-nums;color:var(--ink)}
+
+.labelHint{font-size:12px;color:var(--muted);font-weight:500;margin-top:8px;line-height:1.5}
+
+/* ---------- Toast ---------- */
+.toast{
+  position:fixed;right:22px;bottom:22px;background:var(--ink);border:1px solid var(--ink);
+  color:#fff;border-radius:var(--radius-sm);padding:11px 16px;font-size:13.5px;font-weight:600;
+  box-shadow:var(--shadow-lg);opacity:0;transform:translateY(12px);pointer-events:none;transition:.2s ease;z-index:99;
+}
+.toast::before{content:"✓ ";color:var(--ok)}
+.toast.show{opacity:1;transform:translateY(0)}
+
+/* ---------- Toplu fiyat ---------- */
+.bulkHead{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:20px;flex-wrap:wrap}
+.bulkHead h2{font-family:var(--display);font-size:20px;font-weight:700;margin:0 0 6px;color:var(--ink);letter-spacing:-.01em}
+.bulkHead p{margin:0;color:var(--muted);font-size:13.5px;max-width:52ch;line-height:1.5}
+.bulkFormatHint{
+  border:1px dashed var(--line-2);background:var(--surface-2);border-radius:var(--radius-sm);
+  padding:12px 14px;font-size:12.5px;color:var(--ink-2);max-width:440px;line-height:1.55;
+}
+.bulkFormatHint strong{color:var(--ink);font-weight:700}
+.bulkFormatHint .muted{color:var(--muted)}
+
+.bulkDefaults{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:18px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+.bulkDefaults label{font-size:12px;color:var(--muted)}
+.bulkDefaults select,.bulkDefaults input{background:var(--surface)}
+.bulkDefaults option,.recordPrintType option{background:var(--surface);color:var(--ink)}
+
+.bulkInputWrap{margin-bottom:16px}
+.bulkInputTop{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;flex-wrap:wrap}
+.bulkInputTop button{width:auto}
+.bulkInputButtons{display:flex;gap:8px;flex-wrap:wrap}
+#bulkPriceRows{min-height:180px;font-family:"Space Grotesk",ui-monospace,monospace;font-size:13.5px;line-height:1.7}
+.tsoftSelectedHint{font-size:12px;color:var(--accent);font-weight:600;margin-top:8px;background:var(--accent-soft);border:1px solid #D5DAFD;border-radius:var(--radius-sm);padding:9px 12px}
+.bulkHelp{display:grid;gap:5px;margin-top:12px}
+.bulkHelp span{font-size:12px;color:var(--muted);line-height:1.5}
+.bulkHelp b{color:var(--ink);font-weight:700}
+.bulkActions{gap:8px}
+.bulkResultsWrap{margin-top:8px}
+.bulkTableScroller{overflow:auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface)}
+.bulkResultTable{width:100%;border-collapse:collapse;min-width:720px}
+.bulkResultTable th,.bulkResultTable td{padding:11px 13px;text-align:right;border-bottom:1px solid var(--line);font-size:13px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.bulkResultTable th:first-child,.bulkResultTable td:first-child{text-align:left;font-variant-numeric:normal}
+.bulkResultTable th{position:sticky;top:0;background:var(--surface-3);color:var(--muted);font-weight:700;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;z-index:1}
+.bulkResultTable tbody tr:hover{background:var(--surface-2)}
+.bulkResultTable b{color:var(--ink);font-family:var(--display)}
+.bulkError td{color:var(--bad);background:var(--bad-soft)}
+.bulkCodeCell{font-family:"Space Grotesk",ui-monospace,monospace;font-size:12px;color:var(--muted)}
+
+/* ---------- T-Soft modalı ---------- */
+.tsoftModalBackdrop{
+  position:fixed;inset:0;z-index:200;display:flex;align-items:flex-start;justify-content:center;
+  padding:6vh 20px;background:rgba(23,24,28,.42);backdrop-filter:blur(3px);
+}
+.tsoftModalBackdrop.hide{display:none!important}
+.tsoftModal{
+  width:min(100%,620px);background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);padding:24px;max-height:86vh;overflow:auto;
+}
+.tsoftModalHead{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:16px}
+.tsoftModalHead h3{margin:0 0 4px;font-family:var(--display);font-size:19px;font-weight:700;color:var(--ink)}
+.tsoftModalHead p{margin:0;font-size:13px;color:var(--muted);line-height:1.5}
+.tsoftModalClose{
+  width:36px;height:36px;flex:none;border-radius:999px;border:1px solid var(--line-2);
+  background:var(--surface-2);color:var(--ink-2);font-size:18px;line-height:1;cursor:pointer;transition:.12s ease;
+}
+.tsoftModalClose:hover{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.tsoftSearchBar{display:flex;gap:8px;margin-bottom:12px}
+.tsoftSearchBar input{flex:1}
+.tsoftSearchBar button{width:auto;flex:none}
+.tsoftModalStatus{font-size:12.5px;color:var(--muted);margin-bottom:12px}
+.tsoftProductResults{display:grid;gap:8px}
+.tsoftProductCard{
+  border:1px solid var(--line);border-radius:var(--radius-sm);padding:13px 14px;background:var(--surface-2);
+  cursor:pointer;transition:.12s ease;display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.tsoftProductCard:hover{border-color:var(--accent);background:var(--surface);box-shadow:var(--ring)}
+.tsoftProductMain b{display:block;color:var(--ink);font-weight:600;font-size:14px}
+.tsoftProductMeta{font-size:12px;color:var(--muted);margin-top:3px}
+.tsoftEmpty{padding:16px;text-align:center;color:var(--muted);font-size:13px}
+.tsoftEmpty.error{color:var(--bad)}
+
+/* ---------- Müşteri / kargo kayıt arayüzü ---------- */
+.customerSearchBox{display:grid;gap:14px;margin-bottom:12px}
+.searchLine{display:flex;gap:8px}
+.searchLine input{flex:1}
+.searchLine button,.customerActions button{width:auto}
+.customerActions{display:flex;gap:8px;flex-wrap:wrap}
+.customerActions .ghost{font-size:13.5px;padding:10px 14px}
+
+.customerBox{border:1px solid var(--line);background:var(--surface-2);border-radius:var(--radius);padding:20px;margin-bottom:16px}
+.customerFormMode{font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px}
+.customerFormMode:empty{display:none}
+
+.customerListPanel{margin-top:8px}
+.customerListTitle{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.customerListTitle b{font-family:var(--display);font-size:15px;color:var(--ink)}
+.customerListTitle span{font-size:12px;color:var(--muted)}
+.customerResults{display:grid;gap:8px}
+.customerResult{
+  border:1px solid var(--line);background:var(--surface);border-radius:var(--radius-sm);
+  padding:13px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;transition:.12s ease;
+}
+.customerResult:hover{border-color:var(--line-2);box-shadow:var(--shadow-sm)}
+.customerResult.selected{border-color:var(--accent);background:var(--accent-soft)}
+.customerResult b{display:block;color:var(--ink);font-weight:600}
+.customerResult b mark{background:rgba(44,67,240,.16);color:var(--accent);border-radius:3px;padding:0 2px}
+.customerResult span{display:block;color:var(--muted);font-size:12px;font-weight:500;margin-top:3px}
+.customerResult button{width:auto;text-align:center}
+.customerAddressMini{font-size:12px;color:var(--muted);margin-top:4px}
+.customerResultActions{display:flex;gap:6px;flex:none}
+.customerResultActions button{padding:8px 12px;font-size:12.5px;border-radius:8px}
+.customerResultActions .dangerBtn{background:var(--surface);border:1px solid var(--line-2);color:var(--bad)}
+.customerResultActions .dangerBtn:hover{background:var(--bad-soft);border-color:var(--bad)}
+
+.selectedCustomer{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+  border:1px solid var(--accent);background:var(--accent-soft);border-radius:var(--radius);padding:14px 16px;margin:14px 0;
+}
+.selectedCustomer span{font-size:12px;color:var(--accent);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.selectedCustomer b{display:block;color:var(--ink);font-size:15px;margin-top:2px}
+.addressDecision{display:flex;gap:8px;flex-wrap:wrap}
+.addressDecision button{width:auto}
+
+.splitNotice{display:flex;flex-direction:column;gap:4px;border-left:3px solid var(--accent);background:var(--surface-2);border-radius:var(--radius-sm);padding:12px 16px;margin-bottom:16px}
+.splitNotice b{font-family:var(--display);color:var(--ink);font-size:14px}
+.splitNotice span{font-size:12.5px;color:var(--muted);line-height:1.5}
+
+.labelRecordsPanel{margin-top:8px}
+.labelRecordsHead{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:end;margin-bottom:14px}
+.labelRecordsHead h3{margin:0 0 4px;font-family:var(--display);font-size:17px;font-weight:700;color:var(--ink)}
+.labelRecordsHead p{margin:0;font-size:12.5px;color:var(--muted);line-height:1.5}
+.labelRecordSearch{display:flex;gap:8px}
+.labelRecordSearch input{min-width:220px}
+.labelRecordSearch button{width:auto;flex:none}
+
+.bulkPrintPanel{display:flex;align-items:center;gap:16px;flex-wrap:wrap;border:1px solid var(--line);background:var(--surface-2);border-radius:var(--radius);padding:12px 16px;margin-bottom:14px}
+.selectAllLine{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;color:var(--ink-2);cursor:pointer}
+.selectAllLine input,.recordCheck input{width:auto;accent-color:var(--accent);cursor:pointer}
+#bulkPrintSelectedInfo{font-size:12.5px;color:var(--muted);flex:1}
+.bulkPrintPanel .primary{margin-left:auto}
+
+.shippingRecordsList{display:grid;gap:10px}
+.shippingRecord{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;border:1px solid var(--line);background:var(--surface);border-radius:var(--radius-sm);padding:14px 16px;transition:.12s ease}
+.shippingRecord:hover{border-color:var(--line-2);box-shadow:var(--shadow-sm)}
+.recordCheck{display:flex;align-items:center}
+.shippingRecordMain b{color:var(--ink);font-weight:600}
+.shippingRecordMain span{display:block;font-size:12.5px;color:var(--muted);margin-top:3px}
+.shippingRecordActions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.shippingRecordActions button{width:auto;padding:8px 12px;font-size:12.5px;border-radius:8px}
+.recordPrintType{display:flex;flex-direction:column;gap:4px}
+.recordPrintType span{font-size:11px;color:var(--muted);font-weight:600}
+.recordPrintType select,.recordSelect,.recordPaperSelect{padding:8px 30px 8px 10px;font-size:12.5px;border-radius:8px}
+.editingBadge{display:inline-block;font-size:11px;font-weight:700;color:var(--warn);background:var(--warn-soft);border:1px solid #F0DDC1;border-radius:999px;padding:2px 9px;margin-left:8px}
+
+.recordsTab.active{color:var(--accent)}
+
+/* ---------- Etiket önizleme sarmalayıcı (ekran) ---------- */
+.labelPreviewWrap{overflow:auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface-3);padding:20px;max-height:74vh}
+.labelPreviewStack{display:grid;gap:16px;justify-items:center}
+.labelPrintSummary{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px;font-size:13px;color:var(--ink-2);line-height:1.6}
+.labelPrintSummary b{color:var(--ink)}
+
+/* ---------- Erişilebilirlik ---------- */
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ---------- Duyarlı ---------- */
+@media(max-width:1180px){
+  .top{display:block}
+  h1{white-space:normal}
+  .topRight{justify-content:flex-start;margin-top:14px}
+  .topRates{justify-content:flex-start}
+  .topConverter{width:100%;max-width:460px}
+  .bulkDefaults{grid-template-columns:repeat(3,1fr)}
+  .labelRecordsHead{grid-template-columns:1fr}
+}
+@media(max-width:820px){
+  body{padding:18px 14px 40px}
+  .wrap{width:100%}
+  #paymentChoice{grid-template-columns:repeat(3,1fr)}
+  .top{display:block}
+  .topRight{flex-direction:column;align-items:stretch;margin-top:12px}
+  .topRates{width:100%}
+  .topConverter{width:100%;max-width:none}
+  .topConverter input{flex:1;min-width:60px}
+  .steps{grid-template-columns:repeat(2,1fr)}
+  .labelSteps{grid-template-columns:repeat(3,1fr)}
+  .grid,.grid3,.cards,.resultExtras,.desiPreview,.currencyResultGrid{grid-template-columns:1fr}
+  .bulkDefaults{grid-template-columns:repeat(2,1fr)}
+  .actions button{max-width:none;flex:1}
+  .body{padding:18px}
+  .toast{left:14px;right:14px;text-align:center}
+  .userGrid{grid-template-columns:1fr}
+  .userGate{margin-top:4vh}
+  .moduleSwitch button{flex:1}
+  .shippingRecord{grid-template-columns:1fr;gap:10px}
+  .shippingRecordActions{justify-content:flex-start}
+  .bulkPrintPanel .primary{margin-left:0}
+}
+@media(max-width:520px){
+  h1{font-size:24px}
+  #paymentChoice{grid-template-columns:repeat(2,1fr)}
+  .topRate,.welcomeChip{width:100%;justify-content:space-between}
+  .topConverter{display:grid;grid-template-columns:1fr auto auto auto;gap:6px;border-radius:16px;padding:8px}
+  .topConverter input,.topConverter select{width:100%}
+  .topConverter .fxResult{grid-column:1 / -1;text-align:left;font-size:15px}
+  .topConverter .fxArrow{display:none}
+  .bulkDefaults{grid-template-columns:1fr}
+}
+
+
+/* ===== KARGO ETİKETİ + YAZDIRMA (v64'ten AYNEN korundu — fiziksel çıktı ölçüleri) ===== */
+.paymentNote .noteLine{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;border-top:1px solid rgba(255,255,255,.08);padding-top:8px}
+.paymentNote .noteLine:first-child{border-top:0;padding-top:0}
+.labelPaper{
+      --paper-w:150mm;
+      --paper-h:100mm;
+      --ratio:1.5;
+      width:min(100%,760px);
+      aspect-ratio:var(--ratio);
+      background:white;
+      color:#0f172a;
+      border-radius:14px;
+      padding:18px;
+      margin:0 auto;
+      box-shadow:0 24px 60px rgba(0,0,0,.35);
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      overflow:hidden;
+      font-family:"Helvetica Neue",Helvetica,Arial,"Liberation Sans",system-ui,sans-serif;
+      -webkit-font-smoothing:antialiased;
+    }
+.labelPaper.paper-a4{--paper-w:210mm;--paper-h:297mm;--ratio:210/297;width:min(100%,560px)}
+.labelPaper.paper-a5{--paper-w:148mm;--paper-h:210mm;--ratio:148/210;width:min(100%,520px)}
+.labelPaper.paper-10x10{--paper-w:100mm;--paper-h:100mm;--ratio:1;width:min(100%,440px)}
+.labelPaper.paper-15x10{--paper-w:150mm;--paper-h:100mm;--ratio:1.5;width:min(100%,620px)}
+.labelHead{display:flex;align-items:center;justify-content:space-between;gap:14px;border-bottom:2px solid #111827;padding-bottom:10px;min-height:48px}
+.labelBrand{display:flex;align-items:center;gap:10px;min-width:0}
+.labelBrand img{max-width:150px;max-height:44px;object-fit:contain}
+.cargoLogo img{max-width:140px;max-height:46px;object-fit:contain}
+.labelTag{font-size:12px;font-weight:900;color:#475569;letter-spacing:.08em;text-transform:uppercase}
+.labelBlock{border:2px solid #111827;border-radius:12px;padding:12px;flex:1;display:flex;flex-direction:column;gap:8px}
+.labelSmallTitle{font-size:12px;font-weight:900;color:#475569;letter-spacing:.08em;text-transform:uppercase}
+.labelRecipient{font-size:24px;font-weight:900;line-height:1.1;word-break:break-word}
+.labelPhone{font-size:19px;font-weight:900;color:#111827}
+.labelAddress{font-size:20px;font-weight:800;line-height:1.25;word-break:break-word;white-space:pre-line}
+.labelMeta{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:auto}
+.labelMeta div{border:1px solid #cbd5e1;border-radius:8px;padding:7px 8px;min-height:44px}
+.labelMeta span{display:block;font-size:10px;font-weight:900;color:#64748b;text-transform:uppercase}
+.labelMeta b{font-size:15px;color:#0f172a}
+.labelBottom{display:flex;justify-content:space-between;gap:10px;align-items:flex-end;border-top:2px solid #111827;padding-top:8px}
+.labelRef{font-size:12px;font-weight:900;color:#475569}
+.fakeBarcode{height:42px;width:180px;background:repeating-linear-gradient(90deg,#111827 0 2px,#fff 2px 4px,#111827 4px 7px,#fff 7px 9px,#111827 9px 10px,#fff 10px 13px,#111827 13px 16px,#fff 16px 17px);background-size:17px 100%;border-radius:2px}
+.paper-10x10{padding:11px;gap:8px}
+.paper-10x10 .labelBrand img{max-width:92px;max-height:30px}
+.paper-10x10 .cargoLogo img{max-width:82px;max-height:32px}
+.paper-10x10 .labelBlock{padding:8px;gap:5px}
+.paper-10x10 .labelRecipient{font-size:15px}
+.paper-10x10 .labelPhone{font-size:13px}
+.paper-10x10 .labelAddress{font-size:12px;line-height:1.18}
+.paper-10x10 .labelMeta{grid-template-columns:1fr 1fr;gap:5px}
+.paper-10x10 .labelMeta div{min-height:31px;padding:4px 5px}
+.paper-10x10 .labelMeta span{font-size:8px}
+.paper-10x10 .labelMeta b{font-size:10px}
+.paper-10x10 .labelBottom{padding-top:5px}
+.paper-10x10 .fakeBarcode{height:24px;width:92px}
+.paper-10x10 .labelTag,.paper-10x10 .labelSmallTitle{font-size:9px}
+.paper-15x10{padding:13px;gap:8px}
+.paper-15x10 .labelBrand img{max-width:112px;max-height:34px}
+.paper-15x10 .cargoLogo img{max-width:110px;max-height:34px}
+.paper-15x10 .labelBlock{padding:9px;gap:5px}
+.paper-15x10 .labelRecipient{font-size:19px}
+.paper-15x10 .labelPhone{font-size:15px}
+.paper-15x10 .labelAddress{font-size:15px;line-height:1.18}
+.paper-15x10 .labelMeta div{min-height:34px;padding:5px 6px}
+.paper-15x10 .labelMeta b{font-size:12px}
+.paper-15x10 .fakeBarcode{height:28px;width:130px}
+.paper-a4 .labelPaper,.paper-a5 .labelPaper{}
+@media print{
+      body.printLabel{
+        background:white!important;
+        padding:0!important;
+        margin:0!important;
+        overflow:visible!important;
+      }
+      body.printLabel *{visibility:hidden!important}
+      body.printLabel #printArea,
+      body.printLabel #printArea *{visibility:visible!important}
+      body.printLabel #printArea{
+        display:block!important;
+        position:fixed!important;
+        inset:0!important;
+        width:var(--print-w)!important;
+        height:var(--print-h)!important;
+        padding:0!important;
+        margin:0!important;
+        background:white!important;
+      }
+      body.printLabel #printArea .labelPaper{
+        width:var(--print-w)!important;
+        height:var(--print-h)!important;
+        max-width:none!important;
+        aspect-ratio:auto!important;
+        margin:0!important;
+        border-radius:0!important;
+        box-shadow:none!important;
+        page-break-after:always;
+      }
+    }
+.labelPaper{
+      background:#fff;
+      color:#111827;
+      border:1px solid #e5e7eb;
+      print-color-adjust:exact;
+      -webkit-print-color-adjust:exact;
+    }
+.labelPaper *{box-sizing:border-box}
+.labelHead{
+      border-bottom:2px solid #0f172a;
+      padding-bottom:9px;
+      align-items:center;
+    }
+.labelBrand img{max-width:168px;max-height:50px;background:transparent!important;object-fit:contain}
+.cargoLogo{
+      background:transparent!important;
+      border:0!important;
+      box-shadow:none!important;
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      min-width:116px;
+    }
+.cargoLogo img{
+      max-width:170px;
+      max-height:58px;
+      background:transparent!important;
+      border:0!important;
+      box-shadow:none!important;
+      object-fit:contain;
+      image-rendering:auto;
+    }
+.dispatchText{
+      margin-top:4px;
+      font-size:11px;
+      font-weight:900;
+      color:#0f172a;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      border:1px solid #0f172a;
+      border-radius:999px;
+      padding:4px 8px;
+      display:inline-flex;
+      width:max-content;
+    }
+.labelTopMeta{
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:7px;
+      margin:2px 0 8px;
+    }
+.labelTopMeta div{
+      border:1px solid #cbd5e1;
+      border-radius:8px;
+      padding:6px 7px;
+      min-height:39px;
+      background:#f8fafc;
+    }
+.labelTopMeta span{
+      display:block;
+      font-size:9px;
+      font-weight:900;
+      color:#64748b;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+    }
+.labelTopMeta b{
+      display:block;
+      font-size:12px;
+      color:#0f172a;
+      line-height:1.15;
+      word-break:break-word;
+    }
+.labelBlock{
+      border:2px solid #0f172a;
+      background:linear-gradient(180deg,#ffffff,#f8fafc);
+      box-shadow:inset 0 0 0 1px rgba(15,23,42,.03);
+    }
+.labelSmallTitle{color:#334155}
+.labelRecipient{color:#020617}
+.labelAddress{color:#0f172a}
+.labelMeta{display:none}
+.labelBottom{
+      border-top:2px solid #0f172a;
+      align-items:center;
+    }
+.labelRef{font-size:12px;color:#0f172a}
+.labelRef strong{font-size:14px}
+.labelPieceBadge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border:2px solid #0f172a;
+      border-radius:10px;
+      padding:6px 9px;
+      font-weight:900;
+      color:#0f172a;
+      background:#f8fafc;
+      min-width:58px;
+    }
+.paper-a4{padding:13mm}
+.paper-a5{padding:10mm}
+.paper-10x10{padding:4mm}
+.paper-15x10{padding:5mm}
+.paper-10x10 .labelTopMeta{grid-template-columns:repeat(2,1fr);gap:4px}
+.paper-10x10 .labelTopMeta div{min-height:26px;padding:3px 4px}
+.paper-10x10 .labelTopMeta span{font-size:7px}
+.paper-10x10 .labelTopMeta b{font-size:9px}
+.paper-10x10 .dispatchText{font-size:7px;padding:2px 5px}
+.paper-10x10 .labelPieceBadge{min-width:38px;padding:3px 5px;font-size:10px}
+.paper-10x10 .cargoLogo{min-width:76px}
+.paper-10x10 .cargoLogo img{max-width:86px;max-height:32px}
+.paper-15x10 .labelTopMeta{grid-template-columns:repeat(5,1fr);gap:5px}
+.paper-15x10 .labelTopMeta div{min-height:31px;padding:4px 5px}
+.paper-15x10 .labelTopMeta span{font-size:8px}
+.paper-15x10 .labelTopMeta b{font-size:10.5px}
+.paper-15x10 .dispatchText{font-size:8px;padding:3px 6px}
+.paper-15x10 .cargoLogo img{max-width:120px;max-height:40px}
+.paper-a4 .labelRecipient{font-size:34px}
+.paper-a4 .labelPhone{font-size:26px}
+.paper-a4 .labelAddress{font-size:28px;line-height:1.28}
+.paper-a4 .labelTopMeta b{font-size:15px}
+.paper-a5 .labelRecipient{font-size:28px}
+.paper-a5 .labelPhone{font-size:22px}
+.paper-a5 .labelAddress{font-size:23px}
+@media print{
+      body.printLabel #printArea .labelPaper{
+        padding:var(--print-pad)!important;
+        overflow:hidden!important;
+        print-color-adjust:exact!important;
+        -webkit-print-color-adjust:exact!important;
+      }
+      body.printLabel #printArea .cargoLogo,
+      body.printLabel #printArea .cargoLogo img,
+      body.printLabel #printArea .labelBrand img{
+        background:transparent!important;
+        box-shadow:none!important;
+      }
+      body.printLabel #printArea .labelTopMeta{
+        break-inside:avoid!important;
+      }
+    }
+.senderBox{
+      border:1px solid #cbd5e1;
+      background:#f8fafc;
+      border-radius:10px;
+      padding:7px 8px;
+      display:grid;
+      gap:3px;
+      color:#0f172a;
+    }
+.senderBox span{
+      font-size:9px;
+      font-weight:900;
+      color:#64748b;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+    }
+.senderBox b{
+      font-size:12px;
+      font-weight:900;
+      color:#0f172a;
+      line-height:1.15;
+    }
+.senderBox small{
+      font-size:10px;
+      font-weight:800;
+      color:#334155;
+      line-height:1.2;
+    }
+.contractBadge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border:2px solid #0f172a;
+      border-radius:999px;
+      padding:5px 8px;
+      font-size:11px;
+      font-weight:900;
+      color:#0f172a;
+      background:#fff;
+      white-space:nowrap;
+    }
+.paper-10x10 .senderBox{padding:4px 5px;gap:1px}
+.paper-10x10 .senderBox span{font-size:7px}
+.paper-10x10 .senderBox b{font-size:8.5px}
+.paper-10x10 .senderBox small{font-size:7.5px}
+.paper-10x10 .contractBadge{font-size:7.5px;padding:2px 4px}
+.paper-15x10 .senderBox{padding:5px 6px}
+.paper-15x10 .senderBox span{font-size:7.5px}
+.paper-15x10 .senderBox b{font-size:9.5px}
+.paper-15x10 .senderBox small{font-size:8px}
+.paper-15x10 .contractBadge{font-size:8.5px;padding:3px 5px}
+.labelPaper{
+      position:relative;
+      background:#fff;
+      color:#111827;
+      border:1px solid #e5e7eb;
+      print-color-adjust:exact;
+      -webkit-print-color-adjust:exact;
+      isolation:isolate;
+    }
+.labelPaper *{box-sizing:border-box}
+.labelHead{
+      border-bottom:2px solid #0f172a;
+      padding-bottom:9px;
+      align-items:center;
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+    }
+.labelBrand img{max-width:178px;max-height:54px;background:transparent!important;object-fit:contain}
+.cargoLogo{
+      background:transparent!important;
+      border:0!important;
+      box-shadow:none!important;
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      min-width:120px;
+    }
+.cargoLogo img{
+      max-width:176px;
+      max-height:60px;
+      background:transparent!important;
+      border:0!important;
+      box-shadow:none!important;
+      object-fit:contain;
+      image-rendering:auto;
+    }
+.dispatchText{
+      margin-top:4px;
+      font-size:11px;
+      font-weight:900;
+      color:#0f172a;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      border:1px solid #0f172a;
+      border-radius:999px;
+      padding:4px 8px;
+      display:inline-flex;
+      width:max-content;
+    }
+.labelTopMeta{
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:7px;
+      margin:2px 0 8px;
+    }
+.labelTopMeta div{
+      border:1px solid #cbd5e1;
+      border-radius:8px;
+      padding:6px 7px;
+      min-height:39px;
+      background:#f8fafc;
+    }
+.labelTopMeta span{
+      display:block;
+      font-size:9px;
+      font-weight:900;
+      color:#64748b;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+    }
+.labelTopMeta b{
+      display:block;
+      font-size:12px;
+      color:#0f172a;
+      line-height:1.15;
+      word-break:break-word;
+    }
+.senderBox{
+      border:1px solid #cbd5e1;
+      background:#f8fafc;
+      border-radius:10px;
+      padding:7px 8px;
+      display:grid;
+      gap:3px;
+      color:#0f172a;
+      margin-bottom:8px;
+    }
+.senderBox span{
+      font-size:9px;
+      font-weight:900;
+      color:#64748b;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+    }
+.senderBox small{
+      font-size:10px;
+      font-weight:800;
+      color:#334155;
+      line-height:1.2;
+    }
+.labelBlock{
+      border:2px solid #0f172a;
+      background:linear-gradient(180deg,#ffffff,#f8fafc);
+      box-shadow:inset 0 0 0 1px rgba(15,23,42,.03);
+    }
+.labelMeta{display:none}
+.qrBox{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      border:1.5px solid #0f172a;
+      border-radius:10px;
+      background:#fff;
+      padding:6px;
+    }
+.qrBox img{width:72px;height:72px;display:block;image-rendering:pixelated;image-rendering:crisp-edges}
+.qrBox span{font-size:9px;font-weight:900;color:#475569;text-transform:uppercase;line-height:1.1;letter-spacing:.02em}
+.labelBottom{
+      border-top:2px solid #0f172a;
+      align-items:center;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+    }
+.labelRef{font-size:12px;color:#0f172a}
+.labelRef strong{font-size:14px}
+.contractBadge,.labelPieceBadge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border:2px solid #0f172a;
+      border-radius:10px;
+      padding:6px 9px;
+      font-weight:900;
+      color:#0f172a;
+      background:#f8fafc;
+      min-width:58px;
+      white-space:nowrap;
+    }
+.fakeBarcode{height:42px;width:170px;background:repeating-linear-gradient(90deg,#111827 0 2px,#fff 2px 4px,#111827 4px 7px,#fff 7px 9px,#111827 9px 10px,#fff 10px 13px,#111827 13px 16px,#fff 16px 17px);background-size:17px 100%;border-radius:2px}
+.paper-a4{padding:13mm}
+.paper-a5{padding:10mm}
+.paper-10x10{padding:4mm}
+.paper-15x10{padding:5mm}
+.paper-10x10 .labelHead{padding-bottom:4px;gap:6px}
+.paper-10x10 .labelBrand img{max-width:92px;max-height:30px}
+.paper-10x10 .cargoLogo{min-width:70px}
+.paper-10x10 .cargoLogo img{max-width:82px;max-height:30px}
+.paper-10x10 .labelTopMeta{grid-template-columns:repeat(2,1fr);gap:4px;margin-bottom:5px}
+.paper-10x10 .labelTopMeta div{min-height:25px;padding:3px 4px}
+.paper-10x10 .labelTopMeta span{font-size:7px}
+.paper-10x10 .labelTopMeta b{font-size:8.5px}
+.paper-10x10 .senderBox{padding:4px 5px;gap:1px;margin-bottom:5px}
+.paper-10x10 .senderBox span{font-size:7px}
+.paper-10x10 .senderBox small{font-size:7.5px}
+.paper-10x10 .dispatchText{font-size:7px;padding:2px 5px}
+.paper-10x10 .labelBlock{padding:7px;gap:4px}
+.paper-10x10 .labelRecipient{font-size:13px}
+.paper-10x10 .labelPhone{font-size:11px}
+.paper-10x10 .labelAddress{font-size:10.5px;line-height:1.12}
+.paper-10x10 .labelSmallTitle{font-size:8px}
+.paper-10x10 .qrBox{padding:3px;gap:3px}
+.paper-10x10 .qrBox img{width:38px;height:38px}
+.paper-10x10 .qrBox span{font-size:6.5px}
+.paper-10x10 .labelBottom{gap:4px;padding-top:4px}
+.paper-10x10 .labelRef{font-size:7.5px}
+.paper-10x10 .labelRef strong{font-size:8.5px}
+.paper-10x10 .contractBadge,.paper-10x10 .labelPieceBadge{min-width:34px;padding:2px 4px;font-size:7.5px;border-width:1px}
+.paper-10x10 .fakeBarcode{height:18px;width:54px}
+.paper-15x10 .labelHead{padding-bottom:5px}
+.paper-15x10 .labelBrand img{max-width:116px;max-height:34px}
+.paper-15x10 .cargoLogo img{max-width:118px;max-height:38px}
+.paper-15x10 .labelTopMeta{grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:5px}
+.paper-15x10 .labelTopMeta div{min-height:29px;padding:4px 5px}
+.paper-15x10 .labelTopMeta span{font-size:7px}
+.paper-15x10 .labelTopMeta b{font-size:9.5px}
+.paper-15x10 .senderBox{padding:4px 6px;margin-bottom:5px}
+.paper-15x10 .senderBox span{font-size:7px}
+.paper-15x10 .senderBox small{font-size:7.8px}
+.paper-15x10 .dispatchText{font-size:7.5px;padding:2px 5px}
+.paper-15x10 .labelBlock{padding:8px;gap:4px}
+.paper-15x10 .labelRecipient{font-size:17px}
+.paper-15x10 .labelPhone{font-size:13px}
+.paper-15x10 .labelAddress{font-size:13px;line-height:1.14}
+.paper-15x10 .qrBox img{width:52px;height:52px}
+.paper-15x10 .qrBox span{font-size:7px}
+.paper-15x10 .labelBottom{padding-top:5px}
+.paper-15x10 .labelRef{font-size:9px}
+.paper-15x10 .labelRef strong{font-size:10px}
+.paper-15x10 .contractBadge,.paper-15x10 .labelPieceBadge{font-size:8.5px;padding:3px 5px;min-width:42px}
+.paper-15x10 .fakeBarcode{height:24px;width:90px}
+.paper-a4 .labelRecipient{font-size:34px}
+.paper-a4 .labelPhone{font-size:26px}
+.paper-a4 .labelAddress{font-size:28px;line-height:1.28}
+.paper-a4 .labelTopMeta b{font-size:15px}
+.paper-a4 .qrBox img{width:108px;height:108px}
+.paper-a5 .labelRecipient{font-size:28px}
+.paper-a5 .labelPhone{font-size:22px}
+.paper-a5 .labelAddress{font-size:23px}
+.paper-a5 .qrBox img{width:92px;height:92px}
+@media print{
+      html,body{width:auto!important;height:auto!important}
+      body.printLabel{
+        background:white!important;
+        padding:0!important;
+        margin:0!important;
+        overflow:visible!important;
+      }
+      body.printLabel > *:not(#printArea){display:none!important}
+      body.printLabel #printArea{
+        display:block!important;
+        position:static!important;
+        width:auto!important;
+        height:auto!important;
+        padding:0!important;
+        margin:0!important;
+        background:white!important;
+      }
+      body.printLabel #printArea .labelPaper{
+        width:var(--print-w)!important;
+        height:var(--print-h)!important;
+        max-width:none!important;
+        aspect-ratio:auto!important;
+        margin:0!important;
+        border-radius:0!important;
+        box-shadow:none!important;
+        overflow:hidden!important;
+        padding:var(--print-pad)!important;
+        page-break-after:auto!important;
+        break-after:auto!important;
+        print-color-adjust:exact!important;
+        -webkit-print-color-adjust:exact!important;
+      }
+      body.printLabel #printArea .labelPaper:not(:last-child){
+        page-break-after:always!important;
+        break-after:page!important;
+      }
+      body.printLabel #printArea .cargoLogo,
+      body.printLabel #printArea .cargoLogo img,
+      body.printLabel #printArea .labelBrand img{
+        background:transparent!important;
+        box-shadow:none!important;
+      }
+    }
+.senderBox{
+  grid-template-columns:auto 1fr;
+  align-items:center;
+  gap:9px!important;
+}
+.senderBox span{
+  grid-column:1 / -1;
+}
+.senderLogo{
+  width:92px;
+  max-height:30px;
+  object-fit:contain;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.senderBox small{
+  display:block;
+}
+.contractBadge{
+  border:1px solid #cbd5e1!important;
+  border-radius:999px!important;
+  padding:4px 8px!important;
+  background:#f8fafc!important;
+  color:#334155!important;
+  font-size:10px!important;
+  min-width:auto!important;
+}
+.contractInline{
+  display:inline-block;
+  margin-top:2px;
+  color:#334155;
+  font-size:11px;
+  font-weight:900;
+}
+.paper-a4 .contractInline,
+.paper-a5 .contractInline{
+  font-size:13px;
+}
+.paper-a4 .senderLogo{width:150px;max-height:48px}
+.paper-a5 .senderLogo{width:128px;max-height:40px}
+.paper-15x10 .senderLogo{width:72px;max-height:22px}
+.paper-10x10 .senderLogo{width:50px;max-height:16px}
+.paper-10x10 .senderBox{grid-template-columns:auto 1fr}
+.paper-10x10 .contractInline{font-size:7px}
+.paper-15x10 .contractInline{font-size:8px}
+@media print{
+  body.printLabel #printArea .senderLogo,
+  body.printLabel #printArea .labelBrand img{
+    display:block!important;
+    visibility:visible!important;
+    background:transparent!important;
+    box-shadow:none!important;
+  }
+  body.printLabel #printArea .contractBadge{
+    border-color:#cbd5e1!important;
+    color:#334155!important;
+    background:#f8fafc!important;
+  }
+}
+/* v46 baskı/kafa alanı düzeltmeleri */
+.brandLine{
+  display:flex!important;
+  align-items:center!important;
+  gap:10px!important;
+  flex-wrap:wrap!important;
+}
+.brandLine img{
+  flex:0 0 auto!important;
+  display:block!important;
+}
+.brandLine .dispatchText{
+  margin-top:0!important;
+  align-self:center!important;
+  line-height:1!important;
+  transform:translateY(-1px);
+}
+.paper-a4 .labelHead,
+.paper-a5 .labelHead{
+  align-items:center!important;
+  min-height:0!important;
+  padding-bottom:7px!important;
+}
+.paper-a4 .brandLine,
+.paper-a5 .brandLine{
+  flex-wrap:nowrap!important;
+}
+.paper-a4 .dispatchText{
+  font-size:12px!important;
+  padding:4px 9px!important;
+  white-space:nowrap!important;
+}
+.paper-a5 .dispatchText{
+  font-size:11px!important;
+  padding:4px 8px!important;
+  white-space:nowrap!important;
+}
+.paper-15x10 .brandLine{gap:6px!important}
+.paper-15x10 .dispatchText{white-space:nowrap!important}
+.paper-10x10 .brandLine{gap:4px!important}
+.paper-10x10 .dispatchText{white-space:nowrap!important}
+@media print{
+  body.printLabel #printArea,
+  body.printLabel #printArea *{
+    visibility:visible!important;
+  }
+  body.printLabel #printArea .brandLine,
+  body.printLabel #printArea .brandLine *,
+  body.printLabel #printArea .senderLogo,
+  body.printLabel #printArea .labelBrand img,
+  body.printLabel #printArea .cargoLogo img{
+    display:flex!important;
+    visibility:visible!important;
+    opacity:1!important;
+    background:transparent!important;
+    box-shadow:none!important;
+  }
+  body.printLabel #printArea .brandLine img,
+  body.printLabel #printArea .senderLogo,
+  body.printLabel #printArea .cargoLogo img{
+    display:block!important;
+  }
+}
+/* v50 A4 kargo çıktısı profesyonel form tasarımı */
+.paper-a4{
+  padding:10mm!important;
+  gap:8mm!important;
+  background:#ffffff!important;
+  border:1px solid #e5e7eb!important;
+  color:#0f172a!important;
+}
+.paper-a4 .labelHead{
+  min-height:34mm!important;
+  padding:0 0 7mm!important;
+  border-bottom:3px solid #0f172a!important;
+  display:grid!important;
+  grid-template-columns:1.2fr .8fr!important;
+  align-items:center!important;
+  gap:10mm!important;
+}
+.paper-a4 .labelBrand{
+  display:flex!important;
+  align-items:center!important;
+  min-width:0!important;
+}
+.paper-a4 .brandLine{
+  display:grid!important;
+  grid-template-columns:auto 1fr!important;
+  align-items:center!important;
+  gap:7mm!important;
+  width:100%!important;
+}
+.paper-a4 .brandLine img{
+  width:58mm!important;
+  max-width:58mm!important;
+  max-height:18mm!important;
+  object-fit:contain!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.paper-a4 .dispatchText{
+  margin:0!important;
+  justify-self:start!important;
+  border:2px solid #0f172a!important;
+  border-radius:999px!important;
+  padding:3.2mm 5mm!important;
+  font-size:13px!important;
+  line-height:1!important;
+  letter-spacing:.08em!important;
+  color:#0f172a!important;
+  background:#f8fafc!important;
+  white-space:nowrap!important;
+  transform:none!important;
+}
+.paper-a4 .cargoLogo{
+  min-width:0!important;
+  justify-content:flex-end!important;
+  background:transparent!important;
+}
+.paper-a4 .cargoLogo img{
+  width:54mm!important;
+  max-width:54mm!important;
+  max-height:20mm!important;
+  object-fit:contain!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.paper-a4 .labelTopMeta{
+  order:2;
+  display:grid!important;
+  grid-template-columns:repeat(5,1fr)!important;
+  gap:3mm!important;
+  margin:0!important;
+}
+.paper-a4 .labelTopMeta div{
+  min-height:16mm!important;
+  padding:3mm!important;
+  border:1.4px solid #cbd5e1!important;
+  border-radius:3mm!important;
+  background:#f8fafc!important;
+}
+.paper-a4 .labelTopMeta span{
+  font-size:10px!important;
+  letter-spacing:.07em!important;
+  color:#64748b!important;
+}
+.paper-a4 .labelTopMeta b{
+  font-size:16px!important;
+  line-height:1.15!important;
+  color:#0f172a!important;
+}
+.paper-a4 .senderBox{
+  order:3;
+  display:grid!important;
+  grid-template-columns:44mm 1fr!important;
+  align-items:center!important;
+  gap:5mm!important;
+  margin:0!important;
+  padding:4mm 5mm!important;
+  border:1.4px solid #cbd5e1!important;
+  border-radius:4mm!important;
+  background:#f8fafc!important;
+}
+.paper-a4 .senderBox span{
+  grid-column:1 / -1!important;
+  font-size:10px!important;
+  color:#64748b!important;
+  letter-spacing:.08em!important;
+}
+.paper-a4 .senderLogo{
+  width:42mm!important;
+  max-width:42mm!important;
+  max-height:13mm!important;
+  object-fit:contain!important;
+}
+.paper-a4 .senderBox small{
+  font-size:13px!important;
+  line-height:1.35!important;
+  color:#334155!important;
+  font-weight:850!important;
+}
+.paper-a4 .labelBlock{
+  order:4;
+  flex:1!important;
+  min-height:96mm!important;
+  padding:8mm!important;
+  border:3px solid #0f172a!important;
+  border-radius:5mm!important;
+  background:linear-gradient(180deg,#ffffff,#f8fafc)!important;
+  display:grid!important;
+  grid-template-rows:auto auto auto 1fr!important;
+  gap:4mm!important;
+}
+.paper-a4 .labelSmallTitle{
+  font-size:12px!important;
+  letter-spacing:.12em!important;
+  color:#475569!important;
+}
+.paper-a4 .labelRecipient{
+  font-size:38px!important;
+  line-height:1.05!important;
+  color:#020617!important;
+  letter-spacing:-.03em!important;
+}
+.paper-a4 .labelPhone{
+  font-size:26px!important;
+  color:#0f172a!important;
+}
+.paper-a4 .labelAddress{
+  font-size:30px!important;
+  line-height:1.22!important;
+  color:#0f172a!important;
+  align-self:start!important;
+}
+.paper-a4 .labelBottom{
+  order:5;
+  min-height:34mm!important;
+  padding:5mm 0 0!important;
+  border-top:3px solid #0f172a!important;
+  display:grid!important;
+  grid-template-columns:1.1fr auto auto!important;
+  align-items:center!important;
+  gap:6mm!important;
+}
+.paper-a4 .labelRef{
+  font-size:15px!important;
+  line-height:1.35!important;
+}
+.paper-a4 .labelRef strong{
+  font-size:18px!important;
+}
+.paper-a4 .contractInline{
+  display:inline-block!important;
+  margin-top:1.5mm!important;
+  padding:1.5mm 3mm!important;
+  border:1.2px solid #cbd5e1!important;
+  border-radius:999px!important;
+  background:#f8fafc!important;
+  color:#334155!important;
+  font-size:13px!important;
+}
+.paper-a4 .qrBox{
+  padding:2.5mm!important;
+  border:1.5px solid #cbd5e1!important;
+  border-radius:3mm!important;
+  background:#fff!important;
+  gap:2mm!important;
+}
+.paper-a4 .qrBox img{
+  width:31mm!important;
+  height:31mm!important;
+}
+.paper-a4 .qrBox span{
+  font-size:10px!important;
+}
+.paper-a4 .labelPieceBadge{
+  min-width:24mm!important;
+  min-height:18mm!important;
+  border:2px solid #0f172a!important;
+  border-radius:4mm!important;
+  font-size:22px!important;
+  background:#f8fafc!important;
+}
+@media print{
+  body.printLabel #printArea .paper-a4{
+    padding:10mm!important;
+    gap:8mm!important;
+    overflow:hidden!important;
+  }
+  body.printLabel #printArea .paper-a4 .dispatchText{
+    position:static!important;
+    transform:none!important;
+  }
+  body.printLabel #printArea .paper-a4 .brandLine img,
+  body.printLabel #printArea .paper-a4 .senderLogo,
+  body.printLabel #printArea .paper-a4 .cargoLogo img{
+    display:block!important;
+    visibility:visible!important;
+    opacity:1!important;
+    background:transparent!important;
+    box-shadow:none!important;
+  }
+}
+/* v51 A5 kargo çıktısı header çakışma düzeltmesi */
+.paper-a5{
+  padding:9mm!important;
+  gap:5.5mm!important;
+  background:#ffffff!important;
+  color:#0f172a!important;
+}
+.paper-a5 .labelHead{
+  display:grid!important;
+  grid-template-columns:1fr auto!important;
+  grid-template-areas:
+    "brandLogo cargoLogo"
+    "dispatch dispatch"!important;
+  align-items:center!important;
+  gap:3.5mm 6mm!important;
+  min-height:0!important;
+  padding:0 0 5mm!important;
+  border-bottom:2.4px solid #0f172a!important;
+}
+.paper-a5 .labelBrand,
+.paper-a5 .brandLine{
+  display:contents!important;
+}
+.paper-a5 .brandLine img{
+  grid-area:brandLogo!important;
+  width:48mm!important;
+  max-width:48mm!important;
+  max-height:15mm!important;
+  object-fit:contain!important;
+  justify-self:start!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.paper-a5 .cargoLogo{
+  grid-area:cargoLogo!important;
+  min-width:0!important;
+  justify-content:end!important;
+  justify-self:end!important;
+  background:transparent!important;
+}
+.paper-a5 .cargoLogo img{
+  width:38mm!important;
+  max-width:38mm!important;
+  max-height:14mm!important;
+  object-fit:contain!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.paper-a5 .dispatchText{
+  grid-area:dispatch!important;
+  justify-self:center!important;
+  align-self:center!important;
+  margin:0!important;
+  transform:none!important;
+  white-space:nowrap!important;
+  max-width:100%!important;
+  border:2px solid #0f172a!important;
+  border-radius:999px!important;
+  padding:2.4mm 6mm!important;
+  font-size:12px!important;
+  line-height:1!important;
+  letter-spacing:.08em!important;
+  background:#f8fafc!important;
+  color:#0f172a!important;
+  z-index:1!important;
+}
+.paper-a5 .labelTopMeta{
+  margin:0!important;
+  gap:2mm!important;
+}
+.paper-a5 .labelTopMeta div{
+  min-height:13mm!important;
+  padding:2.2mm!important;
+  border-radius:2.5mm!important;
+}
+.paper-a5 .labelTopMeta span{
+  font-size:8.5px!important;
+}
+.paper-a5 .labelTopMeta b{
+  font-size:12.5px!important;
+}
+.paper-a5 .senderBox{
+  margin:0!important;
+  padding:3mm 4mm!important;
+}
+.paper-a5 .senderLogo{
+  width:34mm!important;
+  max-width:34mm!important;
+  max-height:11mm!important;
+}
+.paper-a5 .senderBox small{
+  font-size:11px!important;
+}
+.paper-a5 .labelBlock{
+  min-height:86mm!important;
+  padding:6mm!important;
+  border:2.4px solid #0f172a!important;
+  border-radius:4mm!important;
+}
+.paper-a5 .labelRecipient{
+  font-size:30px!important;
+  line-height:1.05!important;
+}
+.paper-a5 .labelPhone{
+  font-size:21px!important;
+}
+.paper-a5 .labelAddress{
+  font-size:23px!important;
+  line-height:1.18!important;
+}
+.paper-a5 .labelBottom{
+  min-height:26mm!important;
+  padding-top:4mm!important;
+  border-top:2.4px solid #0f172a!important;
+  display:grid!important;
+  grid-template-columns:1fr auto auto!important;
+  align-items:center!important;
+  gap:4mm!important;
+}
+.paper-a5 .labelRef{
+  font-size:11px!important;
+  line-height:1.25!important;
+}
+.paper-a5 .labelRef strong{
+  font-size:13px!important;
+}
+.paper-a5 .contractInline{
+  font-size:10px!important;
+  padding:1.2mm 2.5mm!important;
+}
+.paper-a5 .qrBox{
+  padding:2mm!important;
+  gap:1.6mm!important;
+}
+.paper-a5 .qrBox img{
+  width:24mm!important;
+  height:24mm!important;
+}
+.paper-a5 .qrBox span{
+  font-size:8px!important;
+}
+.paper-a5 .labelPieceBadge{
+  min-width:18mm!important;
+  min-height:14mm!important;
+  font-size:17px!important;
+}
+@media print{
+  body.printLabel #printArea .paper-a5{
+    padding:9mm!important;
+    gap:5.5mm!important;
+    overflow:hidden!important;
+  }
+  body.printLabel #printArea .paper-a5 .labelHead{
+    display:grid!important;
+    grid-template-columns:1fr auto!important;
+    grid-template-areas:
+      "brandLogo cargoLogo"
+      "dispatch dispatch"!important;
+  }
+  body.printLabel #printArea .paper-a5 .labelBrand,
+  body.printLabel #printArea .paper-a5 .brandLine{
+    display:contents!important;
+  }
+  body.printLabel #printArea .paper-a5 .brandLine img,
+  body.printLabel #printArea .paper-a5 .cargoLogo img,
+  body.printLabel #printArea .paper-a5 .senderLogo{
+    display:block!important;
+    visibility:visible!important;
+    opacity:1!important;
+    background:transparent!important;
+    box-shadow:none!important;
+  }
+  body.printLabel #printArea .paper-a5 .dispatchText{
+    position:static!important;
+    transform:none!important;
+  }
+}
+/* v52 A4/A5 nihai kompakt baskı tasarımı - önceki büyük kuralları ezer */
+.paper-a4,
+.paper-a5{
+  display:flex!important;
+  flex-direction:column!important;
+  box-sizing:border-box!important;
+  overflow:hidden!important;
+  background:#fff!important;
+  color:#0f172a!important;
+  border:1px solid #e5e7eb!important;
+  font-family:Arial,Helvetica,sans-serif!important;
+}
+.paper-a4{
+  padding:10mm!important;
+  gap:4.5mm!important;
+}
+.paper-a5{
+  padding:8mm!important;
+  gap:3.5mm!important;
+}
+/* Header: logo - irsaliye - kargo logosu. Tek satır, çakışma yok */
+.paper-a4 .labelHead,
+.paper-a5 .labelHead{
+  display:grid!important;
+  grid-template-columns:auto 1fr auto!important;
+  grid-template-areas:"brand dispatch cargo"!important;
+  align-items:center!important;
+  gap:5mm!important;
+  min-height:auto!important;
+  margin:0!important;
+  border-bottom:2px solid #0f172a!important;
+  padding:0 0 3mm!important;
+  flex:0 0 auto!important;
+}
+.paper-a4 .labelBrand,
+.paper-a5 .labelBrand{
+  display:block!important;
+  grid-area:brand!important;
+  min-width:0!important;
+}
+.paper-a4 .brandLine,
+.paper-a5 .brandLine{
+  display:block!important;
+  width:auto!important;
+  min-width:0!important;
+}
+.paper-a4 .brandLine img,
+.paper-a5 .brandLine img{
+  display:block!important;
+  object-fit:contain!important;
+  justify-self:auto!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.paper-a4 .brandLine img{
+  width:50mm!important;
+  max-width:50mm!important;
+  max-height:15mm!important;
+}
+.paper-a5 .brandLine img{
+  width:36mm!important;
+  max-width:36mm!important;
+  max-height:11mm!important;
+}
+.paper-a4 .dispatchText,
+.paper-a5 .dispatchText{
+  grid-area:dispatch!important;
+  justify-self:center!important;
+  align-self:center!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  margin:0!important;
+  transform:none!important;
+  position:static!important;
+  white-space:nowrap!important;
+  max-width:100%!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  border:1.6px solid #0f172a!important;
+  border-radius:999px!important;
+  background:#fff!important;
+  color:#0f172a!important;
+  font-weight:900!important;
+  line-height:1!important;
+  letter-spacing:.07em!important;
+  z-index:1!important;
+}
+.paper-a4 .dispatchText{
+  font-size:11px!important;
+  padding:2mm 4mm!important;
+}
+.paper-a5 .dispatchText{
+  font-size:8.6px!important;
+  padding:1.4mm 2.4mm!important;
+  letter-spacing:.04em!important;
+}
+.paper-a4 .cargoLogo,
+.paper-a5 .cargoLogo{
+  grid-area:cargo!important;
+  display:flex!important;
+  justify-content:flex-end!important;
+  align-items:center!important;
+  min-width:0!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+.paper-a4 .cargoLogo img,
+.paper-a5 .cargoLogo img{
+  display:block!important;
+  object-fit:contain!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  border:0!important;
+}
+.paper-a4 .cargoLogo img{
+  width:42mm!important;
+  max-width:42mm!important;
+  max-height:13mm!important;
+}
+.paper-a5 .cargoLogo img{
+  width:28mm!important;
+  max-width:28mm!important;
+  max-height:10mm!important;
+}
+/* Üst bilgi kutuları kompakt */
+.paper-a4 .labelTopMeta,
+.paper-a5 .labelTopMeta{
+  display:grid!important;
+  grid-template-columns:repeat(5,1fr)!important;
+  gap:2mm!important;
+  margin:0!important;
+  flex:0 0 auto!important;
+}
+.paper-a4 .labelTopMeta div,
+.paper-a5 .labelTopMeta div{
+  border:1px solid #cbd5e1!important;
+  background:#f8fafc!important;
+  border-radius:2mm!important;
+  box-sizing:border-box!important;
+  min-height:0!important;
+}
+.paper-a4 .labelTopMeta div{padding:2mm!important}
+.paper-a5 .labelTopMeta div{padding:1.4mm!important}
+.paper-a4 .labelTopMeta span,
+.paper-a5 .labelTopMeta span{
+  display:block!important;
+  color:#64748b!important;
+  font-weight:900!important;
+  text-transform:uppercase!important;
+  letter-spacing:.04em!important;
+}
+.paper-a4 .labelTopMeta span{font-size:8.8px!important}
+.paper-a5 .labelTopMeta span{font-size:6.6px!important}
+.paper-a4 .labelTopMeta b,
+.paper-a5 .labelTopMeta b{
+  display:block!important;
+  color:#0f172a!important;
+  line-height:1.05!important;
+  word-break:break-word!important;
+}
+.paper-a4 .labelTopMeta b{font-size:12px!important}
+.paper-a5 .labelTopMeta b{font-size:8.5px!important}
+/* Gönderici satırı kompakt, logo her zaman görünür */
+.paper-a4 .senderBox,
+.paper-a5 .senderBox{
+  display:grid!important;
+  grid-template-columns:auto 1fr!important;
+  align-items:center!important;
+  gap:3mm!important;
+  margin:0!important;
+  border:1px solid #cbd5e1!important;
+  background:#f8fafc!important;
+  border-radius:2.4mm!important;
+  flex:0 0 auto!important;
+  box-sizing:border-box!important;
+}
+.paper-a4 .senderBox{padding:2.2mm 3mm!important}
+.paper-a5 .senderBox{padding:1.5mm 2mm!important}
+.paper-a4 .senderBox span,
+.paper-a5 .senderBox span{
+  grid-column:1 / -1!important;
+  font-weight:900!important;
+  color:#64748b!important;
+  text-transform:uppercase!important;
+  letter-spacing:.05em!important;
+  line-height:1!important;
+}
+.paper-a4 .senderBox span{font-size:8px!important}
+.paper-a5 .senderBox span{font-size:6.5px!important}
+.paper-a4 .senderLogo,
+.paper-a5 .senderLogo{
+  display:block!important;
+  object-fit:contain!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.paper-a4 .senderLogo{
+  width:32mm!important;
+  max-width:32mm!important;
+  max-height:10mm!important;
+}
+.paper-a5 .senderLogo{
+  width:22mm!important;
+  max-width:22mm!important;
+  max-height:7mm!important;
+}
+.paper-a4 .senderBox small,
+.paper-a5 .senderBox small{
+  display:block!important;
+  color:#334155!important;
+  font-weight:800!important;
+  line-height:1.15!important;
+}
+.paper-a4 .senderBox small{font-size:9.5px!important}
+.paper-a5 .senderBox small{font-size:7px!important}
+/* Alıcı bloğu: büyük ama taşmayan ölçü */
+.paper-a4 .labelBlock,
+.paper-a5 .labelBlock{
+  display:flex!important;
+  flex-direction:column!important;
+  flex:1 1 auto!important;
+  min-height:0!important;
+  margin:0!important;
+  border:2px solid #0f172a!important;
+  background:#fff!important;
+  border-radius:3mm!important;
+  box-sizing:border-box!important;
+  overflow:hidden!important;
+}
+.paper-a4 .labelBlock{
+  padding:5mm!important;
+  gap:2.5mm!important;
+}
+.paper-a5 .labelBlock{
+  padding:3.5mm!important;
+  gap:1.7mm!important;
+}
+.paper-a4 .labelSmallTitle,
+.paper-a5 .labelSmallTitle{
+  color:#475569!important;
+  font-weight:900!important;
+  text-transform:uppercase!important;
+  letter-spacing:.08em!important;
+  flex:0 0 auto!important;
+}
+.paper-a4 .labelSmallTitle{font-size:10px!important}
+.paper-a5 .labelSmallTitle{font-size:7.5px!important}
+.paper-a4 .labelRecipient,
+.paper-a5 .labelRecipient{
+  color:#020617!important;
+  font-weight:900!important;
+  line-height:1.05!important;
+  word-break:break-word!important;
+  flex:0 0 auto!important;
+}
+.paper-a4 .labelRecipient{font-size:27px!important}
+.paper-a5 .labelRecipient{font-size:19px!important}
+.paper-a4 .labelPhone,
+.paper-a5 .labelPhone{
+  color:#0f172a!important;
+  font-weight:900!important;
+  line-height:1.05!important;
+  flex:0 0 auto!important;
+}
+.paper-a4 .labelPhone{font-size:18px!important}
+.paper-a5 .labelPhone{font-size:13px!important}
+.paper-a4 .labelAddress,
+.paper-a5 .labelAddress{
+  color:#0f172a!important;
+  font-weight:800!important;
+  word-break:break-word!important;
+  white-space:pre-line!important;
+  overflow:hidden!important;
+}
+.paper-a4 .labelAddress{
+  font-size:21px!important;
+  line-height:1.18!important;
+}
+.paper-a5 .labelAddress{
+  font-size:14.5px!important;
+  line-height:1.16!important;
+}
+/* Alt bant: QR/ref/parça ölçülü */
+.paper-a4 .labelBottom,
+.paper-a5 .labelBottom{
+  display:grid!important;
+  grid-template-columns:1fr auto auto!important;
+  align-items:center!important;
+  gap:3mm!important;
+  margin:0!important;
+  border-top:2px solid #0f172a!important;
+  flex:0 0 auto!important;
+}
+.paper-a4 .labelBottom{padding:3mm 0 0!important}
+.paper-a5 .labelBottom{padding:2mm 0 0!important}
+.paper-a4 .labelRef,
+.paper-a5 .labelRef{
+  color:#334155!important;
+  font-weight:900!important;
+  line-height:1.2!important;
+  min-width:0!important;
+}
+.paper-a4 .labelRef{font-size:10.5px!important}
+.paper-a5 .labelRef{font-size:7.5px!important}
+.paper-a4 .labelRef strong{font-size:12px!important}
+.paper-a5 .labelRef strong{font-size:8.5px!important}
+.paper-a4 .contractInline,
+.paper-a5 .contractInline{
+  display:inline-block!important;
+  border:1px solid #cbd5e1!important;
+  background:#f8fafc!important;
+  color:#334155!important;
+  border-radius:999px!important;
+  line-height:1!important;
+  margin-top:1mm!important;
+}
+.paper-a4 .contractInline{
+  font-size:9px!important;
+  padding:1mm 2mm!important;
+}
+.paper-a5 .contractInline{
+  font-size:6.5px!important;
+  padding:.7mm 1.2mm!important;
+}
+.paper-a4 .qrBox,
+.paper-a5 .qrBox{
+  display:flex!important;
+  align-items:center!important;
+  border:1px solid #cbd5e1!important;
+  background:#fff!important;
+  border-radius:2mm!important;
+  box-sizing:border-box!important;
+}
+.paper-a4 .qrBox{padding:1.5mm!important;gap:1.3mm!important}
+.paper-a5 .qrBox{padding:1mm!important;gap:.8mm!important}
+.paper-a4 .qrBox img{
+  width:23mm!important;
+  height:23mm!important;
+}
+.paper-a5 .qrBox img{
+  width:16mm!important;
+  height:16mm!important;
+}
+.paper-a4 .qrBox span{font-size:7.5px!important}
+.paper-a5 .qrBox span{font-size:5.5px!important}
+.paper-a4 .labelPieceBadge,
+.paper-a5 .labelPieceBadge{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  border:1.6px solid #0f172a!important;
+  background:#f8fafc!important;
+  color:#0f172a!important;
+  border-radius:2.5mm!important;
+  font-weight:900!important;
+  box-sizing:border-box!important;
+  padding:0!important;
+}
+.paper-a4 .labelPieceBadge{
+  min-width:17mm!important;
+  min-height:12mm!important;
+  font-size:16px!important;
+}
+.paper-a5 .labelPieceBadge{
+  min-width:12mm!important;
+  min-height:8.5mm!important;
+  font-size:11px!important;
+}
+@media print{
+  body.printLabel #printArea .paper-a4{
+    padding:10mm!important;
+    gap:4.5mm!important;
+  }
+  body.printLabel #printArea .paper-a5{
+    padding:8mm!important;
+    gap:3.5mm!important;
+  }
+  body.printLabel #printArea .paper-a4,
+  body.printLabel #printArea .paper-a5{
+    display:flex!important;
+    flex-direction:column!important;
+    box-sizing:border-box!important;
+    overflow:hidden!important;
+  }
+  body.printLabel #printArea .paper-a4 .labelHead,
+  body.printLabel #printArea .paper-a5 .labelHead{
+    display:grid!important;
+    grid-template-columns:auto 1fr auto!important;
+    grid-template-areas:"brand dispatch cargo"!important;
+  }
+  body.printLabel #printArea .paper-a4 .labelBrand,
+  body.printLabel #printArea .paper-a5 .labelBrand{
+    display:block!important;
+    grid-area:brand!important;
+  }
+  body.printLabel #printArea .paper-a4 .brandLine,
+  body.printLabel #printArea .paper-a5 .brandLine{
+    display:block!important;
+  }
+  body.printLabel #printArea .paper-a4 .brandLine img,
+  body.printLabel #printArea .paper-a5 .brandLine img,
+  body.printLabel #printArea .paper-a4 .senderLogo,
+  body.printLabel #printArea .paper-a5 .senderLogo,
+  body.printLabel #printArea .paper-a4 .cargoLogo img,
+  body.printLabel #printArea .paper-a5 .cargoLogo img{
+    display:block!important;
+    visibility:visible!important;
+    opacity:1!important;
+    background:transparent!important;
+    box-shadow:none!important;
+  }
+  body.printLabel #printArea .paper-a4 .dispatchText,
+  body.printLabel #printArea .paper-a5 .dispatchText{
+    position:static!important;
+    transform:none!important;
+  }
+}
+/* v54 firma + müşteri adı baskı alanı */
+.labelCompanyName{
+  font-weight:950;
+  color:#020617;
+  line-height:1.04;
+  word-break:break-word;
+}
+.labelCustomerName{
+  font-weight:900;
+  color:#334155;
+  line-height:1.08;
+  word-break:break-word;
+}
+.labelCustomerName::before{
+  content:"Müşteri: ";
+  color:#64748b;
+  font-weight:900;
+}
+.paper-a4 .labelCompanyName{font-size:25px!important}
+.paper-a4 .labelCustomerName{font-size:17px!important}
+.paper-a5 .labelCompanyName{font-size:18px!important}
+.paper-a5 .labelCustomerName{font-size:12.5px!important}
+.paper-15x10 .labelCompanyName{font-size:16px!important}
+.paper-15x10 .labelCustomerName{font-size:11px!important}
+.paper-10x10 .labelCompanyName{font-size:12px!important}
+.paper-10x10 .labelCustomerName{font-size:8.5px!important}
+/* Eski tek alıcı adı stili, firma/müşteri ayrımı geldiği için daha kompakt */
+.paper-a4 .labelRecipient,
+.paper-a5 .labelRecipient{
+  display:none!important;
+}
+/* v60 kargo çıktısı sıralama düzeltmesi
+   Gönderici + Alıcı bloğu yukarı alındı.
+   Meta kutuları (il/ilçe/ödeme/parça) artık adres bloğunun altında daha kompakt durur. */
+.labelPaper .senderBox{
+  order:2!important;
+}
+.labelPaper .labelBlock{
+  order:3!important;
+}
+.labelPaper .labelTopMeta{
+  order:4!important;
+}
+.labelPaper .labelBottom{
+  order:5!important;
+}
+/* 15x10 ve 10x10 gibi dar etiketlerde meta alanını aşağıda ince bilgi bandı gibi tut */
+.paper-15x10 .labelTopMeta,
+.paper-10x10 .labelTopMeta{
+  margin-top:0!important;
+  grid-template-columns:repeat(5,1fr)!important;
+  gap:3px!important;
+}
+.paper-15x10 .labelTopMeta div,
+.paper-10x10 .labelTopMeta div{
+  min-height:auto!important;
+  padding:3px 4px!important;
+  border-radius:7px!important;
+}
+.paper-15x10 .labelTopMeta span,
+.paper-10x10 .labelTopMeta span{
+  font-size:6.6px!important;
+  line-height:1!important;
+}
+.paper-15x10 .labelTopMeta b,
+.paper-10x10 .labelTopMeta b{
+  font-size:8px!important;
+  line-height:1.05!important;
+}
+/* Gönderici + alıcı bloğu yukarı taşındığı için etiket gövdesi daha kompakt */
+.paper-15x10 .senderBox{
+  margin:0!important;
+}
+.paper-15x10 .labelBlock{
+  min-height:0!important;
+  flex:1 1 auto!important;
+}
+.paper-10x10 .senderBox{
+  margin:0!important;
+}
+.paper-10x10 .labelBlock{
+  min-height:0!important;
+  flex:1 1 auto!important;
+}
+/* A4/A5'te de aynı mantık: önce gönderici/alıcı, sonra teslimat meta bilgileri */
+.paper-a4 .senderBox,
+.paper-a5 .senderBox{
+  order:2!important;
+}
+.paper-a4 .labelBlock,
+.paper-a5 .labelBlock{
+  order:3!important;
+}
+.paper-a4 .labelTopMeta,
+.paper-a5 .labelTopMeta{
+  order:4!important;
+}
+.paper-a4 .labelBottom,
+.paper-a5 .labelBottom{
+  order:5!important;
+}
+@media print{
+  body.printLabel #printArea .labelPaper .senderBox{order:2!important}
+  body.printLabel #printArea .labelPaper .labelBlock{order:3!important}
+  body.printLabel #printArea .labelPaper .labelTopMeta{order:4!important}
+  body.printLabel #printArea .labelPaper .labelBottom{order:5!important}
+}
+/* v61 termal etiket baskısında logo/QR görünürlüğü */
+.printLogoText{
+  display:none;
+}
+.qrImg{
+  image-rendering:auto;
+  print-color-adjust:exact;
+  -webkit-print-color-adjust:exact;
+}
+@media print{
+  body.printLabel #printArea .printLogoText{
+    display:inline-flex!important;
+    visibility:visible!important;
+    opacity:1!important;
+    color:#000!important;
+    background:#fff!important;
+    font-weight:1000!important;
+    letter-spacing:.06em!important;
+    line-height:1!important;
+    text-transform:uppercase!important;
+    print-color-adjust:exact!important;
+    -webkit-print-color-adjust:exact!important;
+  }
+
+  /* Renkli logolar termal etikette silik çıkabildiği için baskıda siyah yazı fallback aktif */
+  body.printLabel #printArea .brandLine > img,
+  body.printLabel #printArea .senderLogo,
+  body.printLabel #printArea .cargoLogo > img{
+    display:none!important;
+  }
+
+  body.printLabel #printArea .brandPrintText{
+    font-size:15px!important;
+    border:2px solid #000!important;
+    border-radius:4px!important;
+    padding:4px 7px!important;
+    white-space:nowrap!important;
+  }
+
+  body.printLabel #printArea .cargoPrintText{
+    font-size:20px!important;
+    border-bottom:4px solid #000!important;
+    padding:2px 0!important;
+    white-space:nowrap!important;
+    min-width:42px!important;
+    justify-content:center!important;
+  }
+
+  body.printLabel #printArea .senderPrintText{
+    font-size:10px!important;
+    border:1px solid #000!important;
+    border-radius:3px!important;
+    padding:2px 4px!important;
+    white-space:nowrap!important;
+  }
+
+  body.printLabel #printArea .qrBox{
+    background:#fff!important;
+    border:1.8px solid #000!important;
+  }
+
+  body.printLabel #printArea .qrBox img,
+  body.printLabel #printArea .qrImg{
+    display:block!important;
+    visibility:visible!important;
+    opacity:1!important;
+    background:#fff!important;
+    filter:contrast(1.35) grayscale(1)!important;
+    print-color-adjust:exact!important;
+    -webkit-print-color-adjust:exact!important;
+  }
+
+  body.printLabel #printArea .printImageFailed + span::after{
+    content:" / QR yüklenemedi";
+    color:#000;
+    font-weight:1000;
+  }
+
+  body.printLabel #printArea .dispatchText{
+    color:#000!important;
+    border-color:#000!important;
+    background:#fff!important;
+  }
+}
+/* Önizlemede de termal mod etkisini belli etmek için logoların siyah karşılığı hafif görünür */
+.labelPaper .cargoPrintText{
+  margin-left:6px;
+}
+/* ============================================================
+   v76 — PROFESYONEL KARGO ETİKETİ (yeniden tasarım)
+   Bu blok, üstteki eski dağınık etiket kurallarını override eder
+   (aynı specificity'de sonra gelen kazanır). Ekran önizlemesi +
+   @media print için tek, tutarlı sistem. mm tabanlı, her boyuta oturur.
+   ============================================================ */
+
+/* --- Ortak etiket gövdesi --- */
+.labelPaper{
+  background:#fff !important;
+  color:#0f172a !important;
+  font-family:"Helvetica Neue",Helvetica,Arial,"Liberation Sans",system-ui,sans-serif !important;
+  -webkit-font-smoothing:antialiased;
+  display:flex !important;
+  flex-direction:column !important;
+  box-shadow:0 20px 50px -24px rgba(15,23,42,.4);
+  border-radius:10px;
+  overflow:hidden;
+}
+
+/* Başlık: marka solda, kargo logosu sağda, altında irsaliye rozeti */
+.labelPaper .labelHead{
+  display:grid !important;
+  grid-template-columns:1fr auto !important;
+  align-items:start !important;
+  gap:4mm !important;
+  border:0 !important;
+  border-bottom:2.5px solid #0f172a !important;
+  min-height:0 !important;
+}
+.labelPaper .labelBrand{display:flex !important;flex-direction:column !important;align-items:flex-start !important;gap:2mm !important;min-width:0 !important}
+.labelPaper .brandLine{display:flex !important;align-items:center !important;gap:0 !important;min-width:0 !important}
+.labelPaper .brandLine img{display:block;object-fit:contain;background:transparent !important;box-shadow:none !important}
+.labelPaper .dispatchText{
+  display:inline-flex !important;align-items:center !important;justify-content:center !important;
+  border:1.5px solid #0f172a !important;border-radius:999px !important;
+  font-weight:800 !important;letter-spacing:.06em !important;text-transform:uppercase !important;
+  background:#f8fafc !important;color:#0f172a !important;white-space:nowrap !important;
+  margin:0 !important;transform:none !important;position:static !important;
+}
+.labelPaper .cargoLogo{display:flex !important;align-items:center !important;justify-content:flex-end !important;min-width:0 !important;background:transparent !important}
+.labelPaper .cargoLogo img{display:block;object-fit:contain;background:transparent !important;box-shadow:none !important}
+
+/* Gönderici şeridi */
+.labelPaper .senderBox{
+  display:grid !important;
+  grid-template-columns:auto auto 1fr !important;
+  align-items:center !important;
+  gap:0 3mm !important;
+  border:1px solid #cbd5e1 !important;background:#f8fafc !important;border-radius:2.5mm !important;
+  color:#0f172a !important;
+}
+.labelPaper .senderBox > span:first-child{
+  grid-row:1 / span 2;font-weight:800 !important;color:#64748b !important;text-transform:uppercase !important;
+  letter-spacing:.06em !important;writing-mode:horizontal-tb;align-self:center;
+}
+.labelPaper .senderLogo{object-fit:contain;background:transparent !important;box-shadow:none !important}
+.labelPaper .senderBox small{color:#334155 !important;font-weight:700 !important;grid-column:2 / -1}
+
+/* Alıcı bloğu — etiketin ana odağı, çerçeveli, büyük */
+.labelPaper .labelBlock{
+  border:2.5px solid #0f172a !important;border-radius:3mm !important;
+  background:#fff !important;box-shadow:none !important;
+  display:flex !important;flex-direction:column !important;
+  flex:1 1 auto !important;min-height:0 !important;
+}
+.labelPaper .labelSmallTitle{
+  font-weight:900 !important;color:#fff !important;background:#0f172a !important;
+  letter-spacing:.1em !important;text-transform:uppercase !important;
+  align-self:flex-start;border-radius:0 0 2mm 0 !important;
+}
+.labelPaper .labelCompanyName{font-weight:900 !important;color:#0f172a !important;line-height:1.12 !important;word-break:break-word}
+.labelPaper .labelCustomerName{font-weight:800 !important;color:#0f172a !important;line-height:1.12 !important;word-break:break-word}
+.labelPaper .labelPhone{font-weight:900 !important;color:#0f172a !important;font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.labelPaper .labelAddress{font-weight:700 !important;color:#1e293b !important;line-height:1.3 !important;white-space:pre-line;word-break:break-word}
+
+/* Meta şerit: ilçe / il / posta / ödeme / parça */
+.labelPaper .labelTopMeta{
+  display:grid !important;grid-template-columns:repeat(5,1fr) !important;
+  margin:0 !important;
+}
+.labelPaper .labelTopMeta div{
+  border:1px solid #cbd5e1 !important;background:#f8fafc !important;border-radius:2mm !important;
+  display:flex;flex-direction:column;justify-content:center;min-height:0 !important;
+}
+.labelPaper .labelTopMeta span{display:block;font-weight:800 !important;color:#64748b !important;text-transform:uppercase !important;letter-spacing:.03em !important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.labelPaper .labelTopMeta b{display:block;font-weight:800 !important;color:#0f172a !important;line-height:1.15 !important;word-break:break-word;overflow-wrap:anywhere}
+
+/* Alt bölüm: ref + barkod solda, QR ortada, parça rozeti sağda */
+.labelPaper .labelBottom{
+  display:grid !important;grid-template-columns:1fr auto auto !important;
+  align-items:stretch !important;gap:4mm !important;
+  border:0 !important;border-top:2.5px solid #0f172a !important;
+}
+.labelPaper .labelRefWrap{display:flex !important;flex-direction:column !important;justify-content:space-between !important;gap:2mm !important;min-width:0}
+.labelPaper .labelRef{display:grid !important;grid-template-columns:auto 1fr !important;gap:.5mm 2mm !important;align-content:start;font-size:inherit}
+.labelPaper .labelRef > span{color:#64748b !important;font-weight:800 !important;text-transform:uppercase !important;letter-spacing:.02em;white-space:nowrap}
+.labelPaper .labelRef > strong{color:#0f172a !important;font-weight:900 !important;word-break:break-word}
+.labelPaper .labelRef .contractInline{grid-column:1 / -1;color:#475569 !important;font-weight:700 !important;text-transform:none !important;letter-spacing:0;border:0 !important;background:transparent !important;padding:0 !important}
+.labelPaper .barcodeWrap{display:flex;flex-direction:column;gap:1mm;align-items:stretch}
+.labelPaper .barcodeSvg{display:block;width:100%;background:#fff}
+.labelPaper .barcodeWrap em{font-style:normal;text-align:center;font-weight:800;letter-spacing:.14em;color:#0f172a;font-variant-numeric:tabular-nums}
+.labelPaper .qrBox{
+  display:flex !important;flex-direction:column !important;align-items:center !important;justify-content:center !important;
+  gap:1mm !important;border:1.5px solid #0f172a !important;border-radius:2.5mm !important;background:#fff !important;
+}
+.labelPaper .qrBox img{display:block;image-rendering:pixelated;image-rendering:crisp-edges}
+.labelPaper .qrBox span{font-weight:900 !important;color:#0f172a !important;text-transform:uppercase !important;text-align:center;line-height:1.05;letter-spacing:.04em}
+.labelPaper .labelPieceBadge{
+  display:flex !important;align-items:center !important;justify-content:center !important;
+  border:2.5px solid #0f172a !important;border-radius:2.5mm !important;background:#0f172a !important;color:#fff !important;
+  font-weight:900 !important;white-space:nowrap;
+}
+.labelPaper .contractBadge{display:none !important}
+.labelPaper .labelMeta{display:none !important}
+
+/* ---------- 15×10 ETİKET (yatay, termal etiket) ---------- */
+.paper-15x10 .brandLine img{max-width:44mm !important;max-height:12mm !important}
+.paper-15x10 .cargoLogo img{max-width:34mm !important;max-height:12mm !important}
+.paper-15x10 .dispatchText{font-size:8pt !important;padding:1mm 3mm !important}
+.paper-15x10 .labelHead{padding-bottom:2.5mm !important}
+.labelPaper.paper-15x10{padding:4mm !important;gap:2mm !important}
+.paper-15x10 .senderBox{padding:1.2mm 3mm !important;gap:0 2.5mm !important;grid-template-columns:auto auto 1fr !important}
+.paper-15x10 .senderLogo{max-width:18mm !important;max-height:5.5mm !important}
+.paper-15x10 .senderBox small{font-size:6.5pt !important;line-height:1.1 !important}
+.paper-15x10 .senderBox > span:first-child{font-size:5.5pt !important}
+.paper-15x10 .labelBlock{padding:2mm 4mm 2.5mm !important;gap:.8mm !important;margin:0 !important;overflow:hidden !important;justify-content:flex-start !important}
+.paper-15x10 .labelSmallTitle{font-size:7pt !important;padding:.8mm 3mm !important;margin:-2mm 0 .6mm -4mm !important}
+.paper-15x10 .labelCompanyName{font-size:12.5pt !important;line-height:1.05 !important}
+.paper-15x10 .labelCustomerName{font-size:11pt !important;line-height:1.05 !important}
+.paper-15x10 .labelPhone{font-size:11.5pt !important}
+.paper-15x10 .labelAddress{font-size:10.5pt !important;line-height:1.18 !important}
+.paper-15x10 .labelTopMeta{grid-template-columns:repeat(5,1fr) !important;gap:1.5mm !important}
+.paper-15x10 .labelTopMeta div{padding:1.2mm 2mm !important}
+.paper-15x10 .labelTopMeta span{font-size:6pt !important}
+.paper-15x10 .labelTopMeta b{font-size:8.5pt !important}
+.paper-15x10 .labelBottom{padding-top:2mm !important;gap:3mm !important}
+.paper-15x10 .labelRef{font-size:7pt !important}
+.paper-15x10 .barcodeSvg{height:7mm !important}
+.paper-15x10 .barcodeWrap em{font-size:6.5pt !important}
+.paper-15x10 .qrBox{padding:1mm !important}
+.paper-15x10 .qrBox img{width:17mm !important;height:17mm !important}
+.paper-15x10 .qrBox span{font-size:5.5pt !important}
+.paper-15x10 .labelPieceBadge{min-width:11mm !important;font-size:10pt !important;padding:0 2mm !important}
+
+/* ---------- 10×10 ETİKET (kare) ---------- */
+.labelPaper.paper-10x10{padding:4mm !important;gap:2mm !important}
+.paper-10x10 .brandLine img{max-width:30mm !important;max-height:9mm !important}
+.paper-10x10 .cargoLogo img{max-width:24mm !important;max-height:9mm !important}
+.paper-10x10 .dispatchText{font-size:6pt !important;padding:.7mm 2mm !important}
+.paper-10x10 .labelHead{padding-bottom:1.8mm !important}
+.paper-10x10 .senderBox{padding:1.4mm 2mm !important;gap:0 2mm !important}
+.paper-10x10 .senderLogo{max-width:18mm !important;max-height:6mm !important}
+.paper-10x10 .senderBox > span:first-child{font-size:5.5pt !important}
+.paper-10x10 .senderBox small{font-size:5.5pt !important;line-height:1.15 !important}
+.paper-10x10 .labelBlock{padding:2mm 2.5mm 2.5mm !important;gap:.8mm !important}
+.paper-10x10 .labelSmallTitle{font-size:5.5pt !important;padding:.6mm 2mm !important;margin:-2mm 0 .6mm -2.5mm !important}
+.paper-10x10 .labelCompanyName{font-size:9.5pt !important}
+.paper-10x10 .labelCustomerName{font-size:8.5pt !important}
+.paper-10x10 .labelPhone{font-size:8.5pt !important}
+.paper-10x10 .labelAddress{font-size:7.5pt !important;line-height:1.2 !important}
+.paper-10x10 .labelTopMeta{grid-template-columns:repeat(3,1fr) !important;gap:1mm !important}
+.paper-10x10 .labelTopMeta div{padding:.9mm 1.2mm !important}
+.paper-10x10 .labelTopMeta span{font-size:4.8pt !important}
+.paper-10x10 .labelTopMeta b{font-size:6.5pt !important}
+.paper-10x10 .labelBottom{padding-top:1.8mm !important;gap:2mm !important}
+.paper-10x10 .labelRef{font-size:5.5pt !important;gap:.3mm 1.2mm !important}
+.paper-10x10 .barcodeSvg{height:6mm !important}
+.paper-10x10 .barcodeWrap em{font-size:5pt !important}
+.paper-10x10 .qrBox{padding:1mm !important}
+.paper-10x10 .qrBox img{width:15mm !important;height:15mm !important}
+.paper-10x10 .qrBox span{font-size:4.6pt !important}
+.paper-10x10 .labelPieceBadge{min-width:9mm !important;font-size:8pt !important;padding:0 1.5mm !important}
+
+/* ---------- A5 (dikey) ---------- */
+.labelPaper.paper-a5{padding:9mm !important;gap:5mm !important}
+.paper-a5 .brandLine img{max-width:56mm !important;max-height:16mm !important}
+.paper-a5 .cargoLogo img{max-width:42mm !important;max-height:15mm !important}
+.paper-a5 .dispatchText{font-size:10pt !important;padding:1.5mm 4mm !important}
+.paper-a5 .labelHead{padding-bottom:4mm !important}
+.paper-a5 .senderBox{padding:3mm 4mm !important}
+.paper-a5 .senderLogo{max-width:34mm !important;max-height:11mm !important}
+.paper-a5 .senderBox small{font-size:10pt !important}
+.paper-a5 .labelBlock{padding:5mm 6mm 6mm !important;gap:3mm !important}
+.paper-a5 .labelSmallTitle{font-size:9pt !important;padding:1.5mm 4mm !important;margin:-5mm 0 2mm -6mm !important}
+.paper-a5 .labelCompanyName{font-size:22pt !important}
+.paper-a5 .labelCustomerName{font-size:18pt !important}
+.paper-a5 .labelPhone{font-size:18pt !important}
+.paper-a5 .labelAddress{font-size:16pt !important}
+.paper-a5 .labelTopMeta{gap:2.5mm !important}
+.paper-a5 .labelTopMeta div{padding:2.5mm 3mm !important}
+.paper-a5 .labelTopMeta span{font-size:8pt !important}
+.paper-a5 .labelTopMeta b{font-size:11pt !important}
+.paper-a5 .labelBottom{padding-top:4mm !important}
+.paper-a5 .labelRef{font-size:9.5pt !important}
+.paper-a5 .barcodeSvg{height:12mm !important}
+.paper-a5 .barcodeWrap em{font-size:9pt !important}
+.paper-a5 .qrBox{padding:2mm !important}
+.paper-a5 .qrBox img{width:28mm !important;height:28mm !important}
+.paper-a5 .qrBox span{font-size:7pt !important}
+.paper-a5 .labelPieceBadge{min-width:16mm !important;font-size:15pt !important;padding:0 3mm !important}
+
+/* ---------- A4 (dikey, tam sayfa) ---------- */
+.labelPaper.paper-a4{padding:14mm !important;gap:7mm !important}
+.paper-a4 .brandLine img{max-width:72mm !important;max-height:20mm !important}
+.paper-a4 .cargoLogo img{max-width:52mm !important;max-height:20mm !important}
+.paper-a4 .dispatchText{font-size:12pt !important;padding:2mm 5mm !important}
+.paper-a4 .labelHead{padding-bottom:5mm !important}
+.paper-a4 .senderBox{padding:4mm 5mm !important}
+.paper-a4 .senderLogo{max-width:44mm !important;max-height:14mm !important}
+.paper-a4 .senderBox > span:first-child{font-size:9pt !important}
+.paper-a4 .senderBox small{font-size:11pt !important}
+.paper-a4 .labelBlock{padding:8mm 9mm !important;gap:5mm !important;flex:0 0 auto !important;min-height:78mm !important}
+.paper-a4 .labelSmallTitle{font-size:11pt !important;padding:2mm 5mm !important;margin:-8mm 0 3mm -9mm !important}
+.paper-a4 .labelCompanyName{font-size:30pt !important}
+.paper-a4 .labelCustomerName{font-size:24pt !important}
+.paper-a4 .labelPhone{font-size:24pt !important}
+.paper-a4 .labelAddress{font-size:22pt !important;line-height:1.32 !important}
+.paper-a4 .labelTopMeta{gap:3.5mm !important}
+.paper-a4 .labelTopMeta div{padding:3.5mm 4mm !important;min-height:16mm !important}
+.paper-a4 .labelTopMeta span{font-size:9pt !important}
+.paper-a4 .labelTopMeta b{font-size:13pt !important}
+.paper-a4 .labelBottom{padding-top:5mm !important;gap:6mm !important}
+.paper-a4 .labelRef{font-size:11pt !important;gap:1mm 3mm !important}
+.paper-a4 .barcodeSvg{height:18mm !important}
+.paper-a4 .barcodeWrap em{font-size:11pt !important;letter-spacing:.2em}
+.paper-a4 .qrBox{padding:3mm !important}
+.paper-a4 .qrBox img{width:38mm !important;height:38mm !important}
+.paper-a4 .qrBox span{font-size:9pt !important}
+.paper-a4 .labelPieceBadge{min-width:24mm !important;font-size:20pt !important;padding:0 4mm !important}
+
+/* A4/A5'te üstteki alanları sıkıştır, alıcı bloğu nefes alsın; boşluğu dengele */
+.paper-a4 .labelHead, .paper-a5 .labelHead,
+.paper-a4 .senderBox, .paper-a5 .senderBox,
+.paper-a4 .labelTopMeta, .paper-a5 .labelTopMeta,
+.paper-a4 .labelBottom, .paper-a5 .labelBottom{flex:0 0 auto !important}
+
+/* --- Yazdırma: sayfa kenar boşluğu sıfır, etiket tam sayfa --- */
+@media print{
+  body.printLabel #printArea .labelPaper{
+    box-shadow:none !important;border-radius:0 !important;
+    width:100% !important;height:100% !important;
+    page-break-after:always;break-after:page;
+  }
+  body.printLabel #printArea .labelPaper:last-child{page-break-after:auto;break-after:auto}
+  body.printLabel #printArea .brandLine img,
+  body.printLabel #printArea .cargoLogo img,
+  body.printLabel #printArea .senderLogo,
+  body.printLabel #printArea .qrImg,
+  body.printLabel #printArea .barcodeSvg{
+    display:block !important;visibility:visible !important;opacity:1 !important;
+    -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
+  }
+  body.printLabel #printArea .labelSmallTitle,
+  body.printLabel #printArea .labelPieceBadge,
+  body.printLabel #printArea .labelTopMeta div,
+  body.printLabel #printArea .senderBox,
+  body.printLabel #printArea .qrBox,
+  body.printLabel #printArea .dispatchText{
+    -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;
+  }
+}
+
+/* ============================================================
+   v78 — TOPLU FİYAT: T-Soft kart listesi
+   ============================================================ */
+.bulkAddBar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:4px 0 18px}
+.bulkAddBtn{width:auto;font-size:15px;padding:13px 22px}
+.bulkAddHint{font-size:13px;color:var(--muted)}
+
+.bulkCardsHead{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+#bulkCardsCount{font-family:var(--display);font-weight:700;font-size:15px;color:var(--ink)}
+.bulkCardsActions{display:flex;gap:8px;flex-wrap:wrap}
+.bulkCardsActions button{width:auto;font-size:13px;padding:9px 14px}
+
+.bulkCardList{display:grid;gap:10px}
+
+.bulkEmptyState{
+  text-align:center;padding:48px 24px;border:1.5px dashed var(--line-2);border-radius:var(--radius);
+  background:var(--surface-2);display:flex;flex-direction:column;align-items:center;gap:8px;
+}
+.bulkEmptyIcon{font-size:40px;line-height:1}
+.bulkEmptyState b{font-family:var(--display);font-size:17px;color:var(--ink)}
+.bulkEmptyState span{font-size:13.5px;color:var(--muted);max-width:44ch;line-height:1.5}
+
+.bulkCard{
+  position:relative;display:grid;grid-template-columns:minmax(180px,1.1fr) 2fr;gap:16px;align-items:center;
+  border:1px solid var(--line);background:var(--surface);border-radius:var(--radius);
+  padding:16px 44px 16px 18px;box-shadow:var(--shadow-sm);transition:border-color .12s ease, box-shadow .12s ease;
+}
+.bulkCard:hover{border-color:var(--line-2);box-shadow:var(--shadow)}
+.bulkCardError{border-color:#F3C9D1;background:var(--bad-soft)}
+
+.bpLeft{min-width:0}
+.bpName{font-weight:700;font-size:15px;color:var(--ink);line-height:1.25;word-break:break-word}
+.bpMetaRow{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.bpMeta{
+  font-size:11.5px;color:var(--muted);background:var(--surface-3);border:1px solid var(--line);
+  border-radius:999px;padding:3px 9px;font-weight:600;white-space:nowrap;
+  font-variant-numeric:tabular-nums;
+}
+
+.bpPrices{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.bpCol{display:flex;flex-direction:column;gap:3px;min-width:0}
+.bpCol > span{font-size:10.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bpCol > b{font-size:15px;font-weight:700;font-family:var(--display);color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.15}
+.bpCol > em{font-size:11.5px;font-style:normal;color:var(--accent);font-weight:700;font-variant-numeric:tabular-nums}
+.bpCol-tsoft > b{color:var(--muted)}
+.bpCol-main{background:var(--accent-soft);border-radius:8px;padding:6px 8px;margin:-6px -2px}
+.bpCol-main > b{color:var(--accent-ink)}
+.bpCol-profit > b{color:var(--ok)}
+
+.bpErr{font-weight:700;color:var(--bad);align-self:center}
+
+.bpRemove{
+  position:absolute;top:10px;right:10px;width:28px;height:28px;padding:0;border-radius:999px;
+  border:1px solid var(--line-2);background:var(--surface);color:var(--muted);font-size:17px;line-height:1;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.12s ease;
+}
+.bpRemove:hover{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+
+@media(max-width:820px){
+  .bulkCard{grid-template-columns:1fr;gap:12px;padding:16px 44px 16px 16px}
+  .bpPrices{grid-template-columns:repeat(2,1fr)}
+  .bpCol-main{margin:0}
+}

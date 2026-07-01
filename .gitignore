@@ -1,0 +1,13 @@
+# Sırlar — asla commit etme
+config/secrets.local.php
+
+# Yedek ve geçici dosyalar
+*.bak
+*.backup
+*.v*backup
+assets/css/*.v*backup
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log

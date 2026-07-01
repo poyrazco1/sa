@@ -1,0 +1,42 @@
+POYRAZTECH.COM ROOT API ENDPOINT NOTU
+===================================
+
+Bu sürümde T-Soft ürün arama istekleri şu endpoint'e yönlendirildi:
+
+https://poyraztech.com/api.php?action=tsoft_product_search&q=hp
+
+ÖNEMLİ:
+- Eğer proje poyraztech.com ana dizinine kuruluyorsa api.php zaten doğru yerde olur.
+- Eğer proje /akilli-fiyat-sihirbazi-php-v67 gibi alt klasörde duruyorsa, ZIP içindeki api.php dosyasını ayrıca domain köküne kopyala:
+
+  /poyraztech.com/api.php
+
+- api.php dosyası domain kökünden çalıştığında proje klasörünü otomatik bulmaya çalışır.
+- Şu klasörleri otomatik kontrol eder:
+  akilli-fiyat-sihirbazi-php-v70
+  akilli-fiyat-sihirbazi-php-v69
+  akilli-fiyat-sihirbazi-php-v68
+  akilli-fiyat-sihirbazi-php-v67
+  akilli-fiyat-sihirbazi-php-v66
+  akilli-fiyat-sihirbazi-php-v65
+  akilli-fiyat-sihirbazi-php-v64
+  akilli-fiyat-sihirbazi
+
+Test URL'leri:
+
+1) API sağlık kontrolü:
+https://poyraztech.com/api.php
+
+2) Sunucunun dış IP kontrolü:
+https://poyraztech.com/api.php?action=tsoft_ip_check
+
+3) T-Soft ham test:
+https://poyraztech.com/api.php?action=tsoft_raw_test
+
+4) T-Soft bağlantı testi:
+https://poyraztech.com/api.php?action=tsoft_connection_test&q=hp
+
+5) Ürün arama:
+https://poyraztech.com/api.php?action=tsoft_product_search&q=hp
+
+Panel JS artık eski api/tsoft_product_search.php yerine direkt bu root endpoint'e istek atar.
