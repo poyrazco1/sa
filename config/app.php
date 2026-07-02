@@ -54,10 +54,11 @@ function panel_is_authenticated(): bool
 }
 
 /**
- * Sayfa (HTML) koruması. index.php buradan çağırır.
- * Kod tanımlıysa ve oturum yoksa, basit bir giriş formu gösterir ve çıkar.
+ * ESKİ (legacy) sayfa koruması — tek paylaşımlı PANEL_ACCESS_CODE.
+ * Artık yalnızca DB tabanlı auth sistemi kullanılamıyorsa (DB yok/kurulmamış)
+ * geriye dönük emniyet için devreye girer. Yeni akış: includes/auth.php.
  */
-function require_panel_auth(): void
+function legacy_require_panel_auth(): void
 {
     if (!panel_auth_enabled()) {
         return;
@@ -134,10 +135,10 @@ HTML;
 }
 
 /**
- * API (JSON) koruması. api/bootstrap.php buradan çağırır.
- * Kod tanımlıysa ve oturum yoksa 401 JSON döner.
+ * ESKİ (legacy) API koruması — tek paylaşımlı PANEL_ACCESS_CODE.
+ * Yalnızca DB auth kullanılamıyorsa devreye girer.
  */
-function require_api_auth(): void
+function legacy_require_api_auth(): void
 {
     if (!panel_auth_enabled()) {
         return;
@@ -149,4 +150,22 @@ function require_api_auth(): void
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode(['ok' => false, 'message' => 'Yetkisiz. Panele giriş yapman gerekiyor.'], JSON_UNESCAPED_UNICODE);
     exit;
+}
+
+/**
+ * DB tabanlı auth/RBAC sistemi. includes/auth.php içindeki koruyuculara devreder.
+ * DB hazır değilse auth koruyucuları otomatik olarak legacy_* fonksiyonlarına düşer.
+ */
+require_once __DIR__ . '/../includes/auth.php';
+
+/** Sayfa koruması (index.php ve diğer sayfalar buradan çağırır). */
+function require_panel_auth(): void
+{
+    auth_require_login_page();
+}
+
+/** API (JSON) koruması (api/bootstrap.php ve tsoft uçları buradan çağırır). */
+function require_api_auth(): void
+{
+    auth_require_api();
 }

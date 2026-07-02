@@ -87,8 +87,8 @@ function pw_load_tsoft_client(string $projectRoot): array
     $appConfig = $projectRoot . '/config/app.php';
     if (is_file($appConfig)) {
         require_once $appConfig;
-        if (function_exists('require_panel_auth')) {
-            require_panel_auth();
+        if (function_exists('require_api_auth')) {
+            require_api_auth();
         }
     }
 

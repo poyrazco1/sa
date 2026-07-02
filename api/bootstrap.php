@@ -68,6 +68,16 @@ function require_same_origin(): void
 
 require_same_origin();
 
+/**
+ * Token tabanlı CSRF koruması (aynı-köken kontrolüne ek katman).
+ * Yazma isteklerinde geçerli oturum CSRF token'ı (X-CSRF-Token başlığı veya
+ * gövde) beklenir. Panel sayfaları token'ı meta etiketiyle yayınlar ve
+ * assets/js/csrf.js her same-origin yazma isteğine başlık olarak ekler.
+ */
+if (function_exists('auth_require_csrf')) {
+    auth_require_csrf();
+}
+
 function request_json(): array
 {
     $raw = file_get_contents('php://input');

@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../config/app.php';
-require_panel_auth();
+require_api_auth();
 require_once __DIR__ . '/../includes/TsoftRestClient.php';
 
 header('Content-Type: application/json; charset=utf-8');

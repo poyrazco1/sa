@@ -1,3 +1,18 @@
+<?php if (function_exists('auth_check') && auth_check()):
+    $__u = auth_user();
+    $__base = function_exists('auth_base_path') ? auth_base_path() : '';
+    $__name = htmlspecialchars((string)($__u['full_name'] ?? $__u['username'] ?? ''), ENT_QUOTES, 'UTF-8');
+    $__role = htmlspecialchars((string)($__u['role_code'] ?? ''), ENT_QUOTES, 'UTF-8');
+    $__baseE = htmlspecialchars($__base, ENT_QUOTES, 'UTF-8');
+?>
+  <div class="authStrip">
+    <span class="authUser"><b><?= $__name ?></b><span class="authRole"><?= $__role ?></span></span>
+    <span class="authActions">
+      <a href="<?= $__baseE ?>/account.php">Parola</a>
+      <a href="<?= $__baseE ?>/logout.php">Çıkış</a>
+    </span>
+  </div>
+<?php endif; ?>
 <div class="top">
     <div class="brand">
       <h1>Akıllı Fiyat Sihirbazı</h1>
