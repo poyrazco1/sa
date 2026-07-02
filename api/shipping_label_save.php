@@ -85,19 +85,27 @@ try {
     if (!in_array('company_name', $existingColumns, true)) {
         $pdo->exec("ALTER TABLE shipping_label_logs ADD COLUMN company_name VARCHAR(190) NULL AFTER customer_name");
     }
+    // CRM bağ kolonları (geriye uyumlu; app.js göndermezse NULL kalır).
+    foreach (['user_id', 'company_id', 'contact_id'] as $crmCol) {
+        if (!in_array($crmCol, $existingColumns, true)) {
+            $pdo->exec("ALTER TABLE shipping_label_logs ADD COLUMN {$crmCol} BIGINT UNSIGNED NULL");
+        }
+    }
+
+    $__pwUser = (function_exists('auth_user') ? auth_user() : null);
 
     $pdo->beginTransaction();
 
     $stmt = $pdo->prepare("
         INSERT INTO shipping_label_logs (
-            created_by, customer_id, customer_name, company_name, address_mode, carrier, carrier_label, cargo_agreement_code,
+            created_by, user_id, company_id, contact_id, customer_id, customer_name, company_name, address_mode, carrier, carrier_label, cargo_agreement_code,
             sender_name, sender_address, sender_phone, logo_mode,
             payment_type, payment_label, paper, paper_label,
             invoice_ref, piece_total, piece_refs, qr_payloads,
             recipient, phone, raw_address, mahalle, street, door_no,
             postcode, county, city, extra, payload
         ) VALUES (
-            :created_by, :customer_id, :customer_name, :company_name, :address_mode, :carrier, :carrier_label, :cargo_agreement_code,
+            :created_by, :user_id, :company_id, :contact_id, :customer_id, :customer_name, :company_name, :address_mode, :carrier, :carrier_label, :cargo_agreement_code,
             :sender_name, :sender_address, :sender_phone, :logo_mode,
             :payment_type, :payment_label, :paper, :paper_label,
             :invoice_ref, :piece_total, :piece_refs, :qr_payloads,
@@ -111,6 +119,9 @@ try {
 
     $stmt->execute([
         ':created_by' => (string)($data['created_by'] ?? ''),
+        ':user_id' => $__pwUser ? (int)$__pwUser['id'] : (((int)($data['user_id'] ?? 0)) ?: null),
+        ':company_id' => ((int)($data['company_id'] ?? 0)) ?: null,
+        ':contact_id' => ((int)($data['contact_id'] ?? 0)) ?: null,
         ':customer_id' => (string)($data['customer_id'] ?? ''),
         ':customer_name' => (string)($data['customer_name'] ?? ''),
         ':company_name' => (string)($data['company_name'] ?? ''),

@@ -762,6 +762,8 @@ body.app{padding:0}
 .crmDetailHead h3{margin:0 0 4px;font-family:var(--display);font-size:19px;font-weight:700;color:var(--ink)}
 .crmDetailHead p{margin:0;font-size:13px;color:var(--muted)}
 .crmDetailHead .ghost{width:auto}
+.crmDetailActs{display:flex;gap:8px;flex-wrap:wrap;flex:none}
+.crmDetailActs button{width:auto}
 .crmDetailAddr{font-size:13px;color:var(--ink-2);background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:14px;white-space:pre-line}
 .crmDetailLabel{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:16px 0 10px}
 .crmContactList{display:grid;gap:8px}

@@ -527,11 +527,22 @@
       if (co.city) meta.push(co.city + (co.county ? ' / ' + co.county : ''));
       if (co.tax_no) meta.push('VN: ' + co.tax_no);
       ti.appendChild(el('p', null, meta.join('  ·  ') || '—'));
+      var headActs = el('div', 'crmDetailActs');
+      var addCust = el('button', 'ghost', '+ Müşteri listesine ekle');
+      addCust.type = 'button';
+      addCust.onclick = function () {
+        j('api/crm_companies.php', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'add_to_customers', id: co.id })
+        }).then(function (r) { if (r && r.ok) toast(r.message || 'Eklendi'); else alert((r && r.message) || 'Eklenemedi.'); });
+      };
       var close = el('button', 'ghost', 'Kapat');
       close.type = 'button';
       close.onclick = function () { detail.classList.add('hide'); };
+      headActs.appendChild(addCust);
+      headActs.appendChild(close);
       top.appendChild(ti);
-      top.appendChild(close);
+      top.appendChild(headActs);
       card.appendChild(top);
 
       if (co.address) {
@@ -574,6 +585,22 @@
           al.appendChild(it);
         });
         card.appendChild(al);
+      }
+
+      // Kargo gönderileri
+      card.appendChild(el('div', 'crmDetailLabel', 'Kargo gönderileri (' + ((d.shipments && d.shipments.length) || 0) + ')'));
+      if (!d.shipments || !d.shipments.length) {
+        card.appendChild(el('div', 'labelHint', 'Bu firmaya bağlı ya da adı/telefonu eşleşen kargo gönderisi yok.'));
+      } else {
+        var sl = el('div', 'crmContactList');
+        d.shipments.forEach(function (sh) {
+          var si = el('div', 'crmContactItem');
+          si.appendChild(el('b', null, (sh.recipient || sh.company_name || '—') + ' · ' + (sh.invoice_ref || '')));
+          var meta = [sh.carrier_label || sh.carrier, (sh.city || ''), (sh.paper || ''), (sh.created_at || '').substring(0, 10)].filter(Boolean).join(' · ');
+          si.appendChild(el('span', null, meta));
+          sl.appendChild(si);
+        });
+        card.appendChild(sl);
       }
 
       // Not ekle

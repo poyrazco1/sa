@@ -75,7 +75,69 @@ try {
         $as->execute([':id' => $id]);
         $activities = $as->fetchAll(PDO::FETCH_ASSOC);
 
-        json_response(['ok' => true, 'data' => ['company' => $company, 'contacts' => $contacts, 'activities' => $activities]]);
+        // Bu firmaya ait kargo gönderileri: açık bağ (company_id) VEYA ad/telefon eşleşmesi.
+        // Not: native prepared statement duplicate placeholder kabul etmez -> ayrık isimler.
+        $shipments = [];
+        try {
+            $sh = $pdo->prepare("
+                SELECT id, created_at, recipient, company_name, phone, invoice_ref, carrier, carrier_label, paper, city, county
+                FROM shipping_label_logs
+                WHERE company_id = :cid
+                   OR (:name1 <> '' AND (company_name = :name2 OR recipient = :name3))
+                   OR (:phone1 <> '' AND phone = :phone2)
+                ORDER BY id DESC
+                LIMIT 20
+            ");
+            $cname = (string)$company['name'];
+            $cphone = (string)($company['phone'] ?? '');
+            $sh->execute([
+                ':cid' => $id,
+                ':name1' => $cname, ':name2' => $cname, ':name3' => $cname,
+                ':phone1' => $cphone, ':phone2' => $cphone,
+            ]);
+            $shipments = $sh->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Throwable $e) {
+            $shipments = [];
+        }
+
+        json_response(['ok' => true, 'data' => ['company' => $company, 'contacts' => $contacts, 'activities' => $activities, 'shipments' => $shipments]]);
+    }
+
+    /* ---------------- ADD TO CUSTOMERS (kargo müşteri listesine ekle) ---------------- */
+    if ($action === 'add_to_customers') {
+        require_permission_api('crm.edit');
+        $id = (int)($input['id'] ?? 0);
+        if ($id <= 0) {
+            json_response(['ok' => false, 'message' => 'Geçersiz ID.'], 422);
+        }
+        $stmt = $pdo->prepare("SELECT * FROM companies WHERE id = :id");
+        $stmt->execute([':id' => $id]);
+        $company = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$company) {
+            json_response(['ok' => false, 'message' => 'Firma bulunamadı.'], 404);
+        }
+
+        $dup = $pdo->prepare("SELECT id FROM label_customers WHERE company_id = :cid LIMIT 1");
+        $dup->execute([':cid' => $id]);
+        if ($dup->fetch()) {
+            json_response(['ok' => true, 'message' => 'Firma zaten kargo müşteri listesinde.']);
+        }
+
+        $ins = $pdo->prepare("
+            INSERT INTO label_customers (customer_name, company_name, phone, raw_address, county, city, company_id)
+            VALUES (:cn, :co, :ph, :ra, :cy, :ci, :cid)
+        ");
+        $ins->execute([
+            ':cn' => (string)$company['name'],
+            ':co' => (string)$company['name'],
+            ':ph' => (string)($company['phone'] ?? ''),
+            ':ra' => (string)($company['address'] ?? ''),
+            ':cy' => (string)($company['county'] ?? ''),
+            ':ci' => (string)($company['city'] ?? ''),
+            ':cid' => $id,
+        ]);
+        crm_log($pdo, 'system', 'Firma kargo müşteri listesine eklendi', (string)$company['name'], 'company', $id);
+        json_response(['ok' => true, 'message' => 'Firma kargo müşteri listesine eklendi.']);
     }
 
     /* ---------------- SAVE (create/update) ---------------- */
