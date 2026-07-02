@@ -2,29 +2,17 @@
 declare(strict_types=1);
 
 /**
- * Dashboard (Part 3 iskeleti).
- * Gerçek veriden beslenen özet kartları (DB varsa) + hızlı aksiyonlar + canlı kur.
- * Kapsamlı KPI/pipeline/aktivite akışı Part 4'te eklenecektir.
+ * Dashboard (Part 4 — KPI'lar).
+ * Gerçek veriden özet kartları, pipeline ve son aktiviteler (includes/dashboard_data.php).
+ * CRM tabloları henüz boşsa ilgili metrikler 0 gösterir (placeholder değil, gerçek sıfır).
  */
+
+require_once __DIR__ . '/../includes/dashboard_data.php';
 
 $base = function_exists('auth_base_path') ? auth_base_path() : '';
 $baseE = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
 $u = function_exists('auth_user') ? auth_user() : null;
 $hello = htmlspecialchars((string)($u['full_name'] ?? $u['username'] ?? ''), ENT_QUOTES, 'UTF-8');
-
-/** Güvenli satır sayacı — tablo adları sabittir (kullanıcı girdisi değil). */
-function pw_dash_count(?PDO $pdo, string $table, string $where = ''): ?int
-{
-    if (!$pdo instanceof PDO) {
-        return null;
-    }
-    try {
-        $sql = "SELECT COUNT(*) FROM `{$table}`" . ($where !== '' ? " WHERE {$where}" : '');
-        return (int)$pdo->query($sql)->fetchColumn();
-    } catch (Throwable $e) {
-        return null;
-    }
-}
 
 $pdo = null;
 try {
@@ -32,13 +20,14 @@ try {
 } catch (Throwable $e) {
     $pdo = null;
 }
+$stats = dashboard_stats($pdo);
 
-$fmt = static fn(?int $n): string => $n === null ? '—' : number_format($n, 0, ',', '.');
+$n = static fn($v): string => number_format((float)$v, 0, ',', '.');
+$m = static fn($v): string => '₺' . number_format((float)$v, 0, ',', '.');
 
-$priceCount = pw_dash_count($pdo, 'price_calculation_logs');
-$soldCount = pw_dash_count($pdo, 'price_calculation_logs', 'sold = 1');
-$labelCount = pw_dash_count($pdo, 'shipping_label_logs');
-$customerCount = pw_dash_count($pdo, 'label_customers');
+$price = $stats['price'];
+$crm = $stats['crm'];
+$labels = $stats['labels'];
 
 function dash_qicon(string $name): string
 {
@@ -49,38 +38,93 @@ function dash_qicon(string $name): string
     ];
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' . ($p[$name] ?? '') . '</svg>';
 }
+
+$stageOrder = ['new', 'qualified', 'proposal', 'won', 'lost'];
 ?>
 <div class="wrap">
   <div class="pageHead">
-    <h1>Panel özeti<?= $hello !== '' ? ' — <span style="font-weight:600;color:var(--muted);font-size:.6em;font-family:var(--body)">Hoş geldin, ' . $hello . '</span>' : '' ?></h1>
-    <p>Fiyatlama, toplu analiz ve kargo etiketi operasyonlarının hızlı görünümü.</p>
+    <h1>Panel özeti<?= $hello !== '' ? ' <span style="font-weight:600;color:var(--muted);font-size:.55em;font-family:var(--body)">· Hoş geldin, ' . $hello . '</span>' : '' ?></h1>
+    <p>Fiyatlama, CRM ve kargo operasyonlarının bu aya ait canlı görünümü.</p>
   </div>
 
   <div class="dashGrid">
     <div class="statCard">
-      <div class="statLabel">Toplam fiyat hesabı</div>
-      <div class="statValue"><?= $fmt($priceCount) ?></div>
-      <div class="statSub">Kaydedilen hesap sayısı</div>
+      <div class="statLabel">Bu ay fiyat hesabı</div>
+      <div class="statValue"><?= $n($price['month']) ?></div>
+      <div class="statSub"><?= $n($price['today']) ?> bugün · <?= $n($price['total']) ?> toplam</div>
     </div>
     <div class="statCard">
-      <div class="statLabel">Satıldı işaretlenen</div>
-      <div class="statValue"><?= $fmt($soldCount) ?></div>
-      <div class="statSub">Satıldı kaydı</div>
+      <div class="statLabel">Bu ay satılan</div>
+      <div class="statValue"><?= $n($price['sold_month']) ?></div>
+      <div class="statSub"><?= $n($price['sold_total']) ?> toplam satış kaydı</div>
     </div>
     <div class="statCard">
-      <div class="statLabel">Kargo etiketi</div>
-      <div class="statValue"><?= $fmt($labelCount) ?></div>
-      <div class="statSub">Oluşturulan etiket</div>
+      <div class="statLabel">Bu ay net kâr</div>
+      <div class="statValue" style="font-size:24px;color:var(--ok)"><?= $m($price['profit_month']) ?></div>
+      <div class="statSub">Satılanlardan · ciro <?= $m($price['sale_month']) ?></div>
     </div>
     <div class="statCard">
-      <div class="statLabel">Müşteri kaydı</div>
-      <div class="statValue"><?= $fmt($customerCount) ?></div>
-      <div class="statSub">Kayıtlı müşteri</div>
+      <div class="statLabel">Açık fırsat</div>
+      <div class="statValue"><?= $n($crm['opps_open']) ?></div>
+      <div class="statSub"><?= $m($crm['opps_open_amount']) ?> potansiyel</div>
+    </div>
+    <div class="statCard">
+      <div class="statLabel">Açık görev</div>
+      <div class="statValue"><?= $n($crm['tasks_open']) ?></div>
+      <div class="statSub">
+        <?php if ($crm['tasks_overdue'] > 0): ?><span style="color:var(--bad);font-weight:700"><?= $n($crm['tasks_overdue']) ?> geciken</span> · <?php endif; ?>
+        <?= $n($crm['tasks_due_soon']) ?> yaklaşan
+      </div>
     </div>
     <div class="statCard">
       <div class="statLabel">Güncel kur</div>
-      <div class="statValue" id="dashRates" style="font-size:19px">Yükleniyor…</div>
+      <div class="statValue" id="dashRates" style="font-size:18px">Yükleniyor…</div>
       <div class="statSub" id="dashRatesSub">USD / EUR → TL</div>
+    </div>
+  </div>
+
+  <div class="dashCols">
+    <div class="statCard">
+      <div class="statLabel" style="margin-bottom:14px">Satış hunisi (fırsatlar)</div>
+      <?php
+        $hasPipeline = false;
+        foreach ($stageOrder as $st) { if (!empty($stats['pipeline'][$st]['count'])) { $hasPipeline = true; break; } }
+      ?>
+      <?php if (!$hasPipeline): ?>
+        <div class="labelHint">Henüz fırsat yok. CRM &rsaquo; Fırsatlar bölümünden ekledikçe burada özetlenir.</div>
+      <?php else: ?>
+        <div class="pipeList">
+          <?php foreach ($stageOrder as $st):
+            $c = (int)($stats['pipeline'][$st]['count'] ?? 0);
+            $a = (float)($stats['pipeline'][$st]['amount'] ?? 0); ?>
+          <div class="pipeRow">
+            <span class="pipeStage" data-stage="<?= htmlspecialchars($st, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars(ds_stage_label($st), ENT_QUOTES, 'UTF-8') ?></span>
+            <span class="pipeCount"><?= $n($c) ?></span>
+            <span class="pipeAmount"><?= $m($a) ?></span>
+          </div>
+          <?php endforeach; ?>
+        </div>
+      <?php endif; ?>
+    </div>
+
+    <div class="statCard">
+      <div class="statLabel" style="margin-bottom:14px">Son aktiviteler</div>
+      <?php if (empty($stats['recent'])): ?>
+        <div class="labelHint">Henüz aktivite yok. CRM işlemleri (not, durum değişimi, görev) burada listelenecek.</div>
+      <?php else: ?>
+        <div class="actFeed">
+          <?php foreach ($stats['recent'] as $a): ?>
+          <div class="actItem">
+            <div class="actDot" data-type="<?= htmlspecialchars($a['type'], ENT_QUOTES, 'UTF-8') ?>"></div>
+            <div class="actBody">
+              <b><?= htmlspecialchars($a['subject'] !== '' ? $a['subject'] : $a['type'], ENT_QUOTES, 'UTF-8') ?></b>
+              <?php if ($a['body'] !== ''): ?><span><?= htmlspecialchars(mb_substr($a['body'], 0, 120), ENT_QUOTES, 'UTF-8') ?></span><?php endif; ?>
+              <small><?= htmlspecialchars(trim(($a['user_name'] !== '' ? $a['user_name'] . ' · ' : '') . $a['occurred_at']), ENT_QUOTES, 'UTF-8') ?></small>
+            </div>
+          </div>
+          <?php endforeach; ?>
+        </div>
+      <?php endif; ?>
     </div>
   </div>
 
@@ -109,12 +153,9 @@ function dash_qicon(string $name): string
     .then(function (r) { return r.json(); })
     .then(function (d) {
       if (d && d.ok && d.rates) {
-        var usd = d.rates.USD, eur = d.rates.EUR;
         var f = function (v) { return v ? '₺' + Number(v).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—'; };
-        el.textContent = 'USD ' + f(usd) + '  ·  EUR ' + f(eur);
-      } else {
-        el.textContent = 'Kur alınamadı';
-      }
+        el.textContent = 'USD ' + f(d.rates.USD) + '  ·  EUR ' + f(d.rates.EUR);
+      } else { el.textContent = 'Kur alınamadı'; }
     })
     .catch(function () { el.textContent = 'Kur alınamadı'; });
 })();
