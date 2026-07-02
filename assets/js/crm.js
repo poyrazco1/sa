@@ -1,0 +1,399 @@
+/**
+ * CRM ön yüz motoru (Firmalar + Kişiler) — app.js'ten bağımsız.
+ * Tek jenerik motor iki varlığı da yönetir. DOM, textContent/createElement ile
+ * kurulur (XSS güvenli). Yazma istekleri csrf.js ile CSRF başlığı taşır.
+ */
+(function () {
+  'use strict';
+
+  var root = document.getElementById('crmRoot');
+  if (!root) return;
+  var view = root.getAttribute('data-crm-view') || 'companies';
+
+  var CONFIGS = {
+    companies: {
+      endpoint: 'api/crm_companies.php',
+      title: 'Firma',
+      plural: 'Firmalar',
+      hint: 'Müşteri firmalarını yönet; kişileri ve geçmişi tek kartta gör.',
+      columns: [
+        { key: 'name', label: 'Firma', strong: true, detail: true },
+        { key: 'phone', label: 'Telefon' },
+        { key: 'city', label: 'Şehir' },
+        { key: 'contact_count', label: 'Kişi', num: true },
+        { key: 'owner_name', label: 'Sahip' }
+      ],
+      fields: [
+        { k: 'name', label: 'Firma adı *', req: true },
+        { k: 'tax_office', label: 'Vergi dairesi' },
+        { k: 'tax_no', label: 'Vergi no' },
+        { k: 'phone', label: 'Telefon' },
+        { k: 'email', label: 'E-posta' },
+        { k: 'city', label: 'İl' },
+        { k: 'county', label: 'İlçe' },
+        { k: 'source', label: 'Kaynak (nereden geldi)' },
+        { k: 'address', label: 'Adres', textarea: true }
+      ],
+      hasDetail: true
+    },
+    contacts: {
+      endpoint: 'api/crm_contacts.php',
+      title: 'Kişi',
+      plural: 'Kişiler',
+      hint: 'Firma yetkililerini ve bireysel kişileri yönet.',
+      columns: [
+        { key: 'full_name', label: 'Ad Soyad', strong: true },
+        { key: 'title', label: 'Ünvan' },
+        { key: 'company_name', label: 'Firma' },
+        { key: 'phone', label: 'Telefon' },
+        { key: 'email', label: 'E-posta' }
+      ],
+      fields: [
+        { k: 'full_name', label: 'Ad Soyad *', req: true },
+        { k: 'title', label: 'Ünvan' },
+        { k: 'company_id', label: 'Firma', type: 'company' },
+        { k: 'phone', label: 'Telefon' },
+        { k: 'email', label: 'E-posta' },
+        { k: 'note', label: 'Kısa not' }
+      ],
+      hasDetail: false
+    }
+  };
+
+  var cfg = CONFIGS[view] || CONFIGS.companies;
+  var companyOptions = null; // kişi formundaki firma seçenekleri (lazy)
+
+  /* ---- küçük DOM yardımcıları ---- */
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function clear(n) { while (n.firstChild) n.removeChild(n.firstChild); }
+  function j(url, opts) {
+    return fetch(url, opts).then(function (r) { return r.json().catch(function () { return { ok: false, message: 'Geçersiz yanıt.' }; }); });
+  }
+  function toast(msg) {
+    var t = document.getElementById('copyToast');
+    if (!t) { return; }
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(function () { t.classList.remove('show'); }, 1800);
+  }
+
+  /* ---- iskelet ---- */
+  var head = el('div', 'pageHead crmHead');
+  var htxt = el('div');
+  htxt.appendChild(el('h1', null, cfg.plural));
+  htxt.appendChild(el('p', null, cfg.hint));
+  var newBtn = el('button', 'primary', '+ Yeni ' + cfg.title.toLowerCase());
+  newBtn.type = 'button';
+  head.appendChild(htxt);
+  head.appendChild(newBtn);
+
+  var toolbar = el('div', 'crmToolbar');
+  var searchWrap = el('div', 'searchLine');
+  var search = el('input');
+  search.type = 'text';
+  search.placeholder = cfg.plural + ' içinde ara…';
+  var searchBtn = el('button', 'ghost', 'Ara');
+  searchBtn.type = 'button';
+  searchWrap.appendChild(search);
+  searchWrap.appendChild(searchBtn);
+  toolbar.appendChild(searchWrap);
+
+  var formBox = el('div', 'customerBox hide');
+  var errBox = el('div', 'error');
+  var listWrap = el('div', 'tableWrap');
+  var table = el('table');
+  var thead = el('thead');
+  var htr = el('tr');
+  cfg.columns.forEach(function (c) { htr.appendChild(el('th', null, c.label)); });
+  htr.appendChild(el('th', null, ''));
+  thead.appendChild(htr);
+  var tbody = el('tbody');
+  table.appendChild(thead);
+  table.appendChild(tbody);
+  listWrap.appendChild(table);
+
+  var detail = el('div', 'crmDetail hide');
+
+  clear(root);
+  root.appendChild(head);
+  root.appendChild(toolbar);
+  root.appendChild(formBox);
+  root.appendChild(errBox);
+  root.appendChild(listWrap);
+  root.appendChild(detail);
+
+  /* ---- form kurulumu ---- */
+  var inputs = {};
+  var editingId = 0;
+
+  function buildForm() {
+    clear(formBox);
+    inputs = {};
+    var mode = el('div', 'customerFormMode');
+    formBox.appendChild(mode);
+    formBox._mode = mode;
+
+    var grid = el('div', 'grid');
+    cfg.fields.forEach(function (f) {
+      var cell = el('div');
+      cell.appendChild(el('label', null, f.label));
+      var inp;
+      if (f.textarea) {
+        inp = el('textarea');
+      } else if (f.type === 'company') {
+        inp = el('select');
+        var opt0 = el('option', null, '— Firma seçilmedi —');
+        opt0.value = '';
+        inp.appendChild(opt0);
+        if (companyOptions) fillCompanyOptions(inp);
+      } else {
+        inp = el('input');
+        inp.type = 'text';
+      }
+      inp.autocomplete = 'off';
+      inputs[f.k] = inp;
+      cell.appendChild(inp);
+      if (f.textarea) { cell.style.gridColumn = '1 / -1'; }
+      grid.appendChild(cell);
+    });
+    formBox.appendChild(grid);
+
+    var acts = el('div', 'actions');
+    var cancel = el('button', 'ghost', 'Vazgeç');
+    cancel.type = 'button';
+    cancel.onclick = closeForm;
+    var save = el('button', 'primary', 'Kaydet');
+    save.type = 'button';
+    save.onclick = submitForm;
+    acts.appendChild(cancel);
+    acts.appendChild(save);
+    formBox.appendChild(acts);
+  }
+
+  function fillCompanyOptions(sel) {
+    (companyOptions || []).forEach(function (c) {
+      var o = el('option', null, c.name);
+      o.value = c.id;
+      sel.appendChild(o);
+    });
+  }
+
+  function ensureCompanyOptions(cb) {
+    if (companyOptions) { cb(); return; }
+    j('api/crm_companies.php?action=list').then(function (r) {
+      companyOptions = (r && r.ok && r.data) ? r.data : [];
+      cb();
+    }).catch(function () { companyOptions = []; cb(); });
+  }
+
+  function openForm(row) {
+    editingId = row ? (row.id | 0) : 0;
+    var render = function () {
+      buildForm();
+      formBox._mode.textContent = editingId ? (cfg.title + ' düzenleniyor') : ('Yeni ' + cfg.title.toLowerCase());
+      cfg.fields.forEach(function (f) {
+        var v = row ? (row[f.k] != null ? row[f.k] : '') : '';
+        inputs[f.k].value = v;
+      });
+      formBox.classList.remove('hide');
+      detail.classList.add('hide');
+      formBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      var first = cfg.fields[0];
+      if (first && inputs[first.k]) inputs[first.k].focus();
+    };
+    if (cfg.fields.some(function (f) { return f.type === 'company'; })) {
+      ensureCompanyOptions(render);
+    } else { render(); }
+  }
+
+  function closeForm() {
+    formBox.classList.add('hide');
+    errBox.textContent = '';
+    editingId = 0;
+  }
+
+  function submitForm() {
+    errBox.textContent = '';
+    var payload = { action: 'save', id: editingId };
+    cfg.fields.forEach(function (f) { payload[f.k] = inputs[f.k] ? inputs[f.k].value : ''; });
+    var reqField = cfg.fields.find(function (f) { return f.req; });
+    if (reqField && !String(payload[reqField.k] || '').trim()) {
+      errBox.textContent = reqField.label.replace(' *', '') + ' zorunlu.';
+      return;
+    }
+    j(cfg.endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).then(function (r) {
+      if (r && r.ok) {
+        toast(r.message || 'Kaydedildi');
+        closeForm();
+        companyOptions = null; // firma listesi değişmiş olabilir
+        loadList();
+      } else {
+        errBox.textContent = (r && r.message) || 'Kaydedilemedi.';
+      }
+    }).catch(function () { errBox.textContent = 'Bağlantı hatası.'; });
+  }
+
+  /* ---- liste ---- */
+  function loadList() {
+    var q = encodeURIComponent(search.value.trim());
+    clear(tbody);
+    tbody.appendChild(rowMsg('Yükleniyor…'));
+    j(cfg.endpoint + '?action=list&q=' + q).then(function (r) {
+      clear(tbody);
+      if (!r || !r.ok) { tbody.appendChild(rowMsg((r && r.message) || 'Liste alınamadı.')); return; }
+      if (!r.data.length) { tbody.appendChild(rowMsg('Kayıt yok. “+ Yeni ' + cfg.title.toLowerCase() + '” ile ekle.')); return; }
+      r.data.forEach(function (row) { tbody.appendChild(buildRow(row)); });
+    }).catch(function () { clear(tbody); tbody.appendChild(rowMsg('Bağlantı hatası.')); });
+  }
+
+  function rowMsg(msg) {
+    var tr = el('tr');
+    var td = el('td', null, msg);
+    td.colSpan = cfg.columns.length + 1;
+    td.style.color = 'var(--muted)';
+    tr.appendChild(td);
+    return tr;
+  }
+
+  function buildRow(row) {
+    var tr = el('tr');
+    cfg.columns.forEach(function (c) {
+      var td = el('td');
+      var val = row[c.key];
+      if (c.num) { td.textContent = val != null ? val : '0'; }
+      else if (c.detail && cfg.hasDetail) {
+        var a = el('a', null, val || '—');
+        a.href = '#';
+        a.style.color = 'var(--accent-ink)';
+        a.style.fontWeight = '600';
+        a.style.textDecoration = 'none';
+        a.onclick = function (e) { e.preventDefault(); openDetail(row.id); };
+        td.appendChild(a);
+      } else if (c.strong) {
+        var b = el('b', null, val || '—');
+        td.appendChild(b);
+      } else {
+        td.textContent = val != null && val !== '' ? val : '—';
+      }
+      tr.appendChild(td);
+    });
+    var actTd = el('td');
+    actTd.style.whiteSpace = 'nowrap';
+    var edit = el('button', 'ghost', 'Düzenle');
+    edit.type = 'button';
+    edit.style.padding = '7px 12px';
+    edit.onclick = function () { openForm(row); };
+    var del = el('button', 'ghost dangerBtn', 'Sil');
+    del.type = 'button';
+    del.style.padding = '7px 12px';
+    del.style.marginLeft = '6px';
+    del.onclick = function () { removeRow(row); };
+    actTd.appendChild(edit);
+    actTd.appendChild(del);
+    tr.appendChild(actTd);
+    return tr;
+  }
+
+  function removeRow(row) {
+    var name = row.name || row.full_name || 'kayıt';
+    if (!window.confirm('“' + name + '” silinsin mi? Bu işlem geri alınamaz.')) return;
+    j(cfg.endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'delete', id: row.id })
+    }).then(function (r) {
+      if (r && r.ok) { toast(r.message || 'Silindi'); companyOptions = null; loadList(); }
+      else { alert((r && r.message) || 'Silinemedi.'); }
+    }).catch(function () { alert('Bağlantı hatası.'); });
+  }
+
+  /* ---- firma detayı ---- */
+  function openDetail(id) {
+    detail.classList.remove('hide');
+    clear(detail);
+    detail.appendChild(el('div', 'labelHint', 'Yükleniyor…'));
+    j('api/crm_companies.php?action=get&id=' + encodeURIComponent(id)).then(function (r) {
+      clear(detail);
+      if (!r || !r.ok) { detail.appendChild(el('div', 'error', (r && r.message) || 'Detay alınamadı.')); return; }
+      var d = r.data, co = d.company;
+      var card = el('div', 'crmDetailCard');
+
+      var top = el('div', 'crmDetailHead');
+      var ti = el('div');
+      ti.appendChild(el('h3', null, co.name));
+      var meta = [];
+      if (co.phone) meta.push('Tel: ' + co.phone);
+      if (co.email) meta.push(co.email);
+      if (co.city) meta.push(co.city + (co.county ? ' / ' + co.county : ''));
+      if (co.tax_no) meta.push('VN: ' + co.tax_no);
+      ti.appendChild(el('p', null, meta.join('  ·  ') || '—'));
+      var close = el('button', 'ghost', 'Kapat');
+      close.type = 'button';
+      close.onclick = function () { detail.classList.add('hide'); };
+      top.appendChild(ti);
+      top.appendChild(close);
+      card.appendChild(top);
+
+      if (co.address) {
+        var addr = el('div', 'crmDetailAddr', co.address);
+        card.appendChild(addr);
+      }
+
+      // kişiler
+      card.appendChild(el('div', 'crmDetailLabel', 'Kişiler (' + d.contacts.length + ')'));
+      if (!d.contacts.length) {
+        card.appendChild(el('div', 'labelHint', 'Bu firmaya bağlı kişi yok.'));
+      } else {
+        var cl = el('div', 'crmContactList');
+        d.contacts.forEach(function (ct) {
+          var ci = el('div', 'crmContactItem');
+          ci.appendChild(el('b', null, ct.full_name));
+          var sub = [ct.title, ct.phone, ct.email].filter(Boolean).join(' · ');
+          ci.appendChild(el('span', null, sub || '—'));
+          cl.appendChild(ci);
+        });
+        card.appendChild(cl);
+      }
+
+      // aktivite
+      card.appendChild(el('div', 'crmDetailLabel', 'Geçmiş'));
+      if (!d.activities.length) {
+        card.appendChild(el('div', 'labelHint', 'Henüz kayıt yok.'));
+      } else {
+        var al = el('div', 'actFeed');
+        d.activities.forEach(function (a) {
+          var it = el('div', 'actItem');
+          var dot = el('div', 'actDot');
+          dot.setAttribute('data-type', a.type || '');
+          var bd = el('div', 'actBody');
+          bd.appendChild(el('b', null, a.subject || a.type || 'Kayıt'));
+          if (a.body) bd.appendChild(el('span', null, a.body));
+          bd.appendChild(el('small', null, [a.user_name, a.occurred_at].filter(Boolean).join(' · ')));
+          it.appendChild(dot);
+          it.appendChild(bd);
+          al.appendChild(it);
+        });
+        card.appendChild(al);
+      }
+
+      detail.appendChild(card);
+      detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }).catch(function () { clear(detail); detail.appendChild(el('div', 'error', 'Bağlantı hatası.')); });
+  }
+
+  /* ---- olaylar ---- */
+  newBtn.onclick = function () { openForm(null); };
+  searchBtn.onclick = loadList;
+  search.addEventListener('keydown', function (e) { if (e.key === 'Enter') loadList(); });
+
+  loadList();
+})();

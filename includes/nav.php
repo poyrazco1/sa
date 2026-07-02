@@ -30,6 +30,8 @@ function nav_icon(string $name): string
         'price' => '<rect x="4" y="2.5" width="16" height="19" rx="2"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="10" y2="11"/><line x1="13" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="10" y2="15"/><line x1="8" y1="18" x2="10" y2="18"/>',
         'bulk' => '<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1.4"/><circle cx="3.5" cy="12" r="1.4"/><circle cx="3.5" cy="18" r="1.4"/>',
         'label' => '<path d="M3 8a2 2 0 0 1 2-2h8l7 7-6 6-7-7V8z"/><circle cx="8" cy="10" r="1.4"/>',
+        'company' => '<rect x="4" y="3" width="10" height="18" rx="1.5"/><path d="M14 8h5a1 1 0 0 1 1 1v12h-6"/><line x1="7" y1="7" x2="11" y2="7"/><line x1="7" y1="11" x2="11" y2="11"/><line x1="7" y1="15" x2="11" y2="15"/>',
+        'contact' => '<circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/>',
     ];
     $body = $p[$name] ?? $p['dashboard'];
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' . $body . '</svg>';
@@ -68,6 +70,18 @@ $activeTool = $isTools ? $pwTool : '';
     </a>
     <a class="navItem<?= ($isTools && $activeTool === 'label') ? ' active' : '' ?>" href="<?= $baseE ?>/index.php?view=tools&amp;tool=label">
       <?= nav_icon('label') ?><span>Kargo Etiketi</span>
+    </a>
+  </nav>
+  <?php endif; ?>
+
+  <?php if ($can('crm.view')): ?>
+  <nav class="navGroup" aria-label="CRM">
+    <div class="navLabel">CRM</div>
+    <a class="navItem<?= $pwView === 'companies' ? ' active' : '' ?>" href="<?= $baseE ?>/index.php?view=companies">
+      <?= nav_icon('company') ?><span>Firmalar</span>
+    </a>
+    <a class="navItem<?= $pwView === 'contacts' ? ' active' : '' ?>" href="<?= $baseE ?>/index.php?view=contacts">
+      <?= nav_icon('contact') ?><span>Kişiler</span>
     </a>
   </nav>
   <?php endif; ?>

@@ -14,6 +14,8 @@ if (!in_array($tool, ['price', 'bulkPrice', 'label'], true)) {
 $viewPerms = [
     'dashboard' => 'dashboard.view',
     'tools'     => 'tools.use',
+    'companies' => 'crm.view',
+    'contacts'  => 'crm.view',
 ];
 if (!isset($viewPerms[$view])) {
     $view = 'dashboard';
@@ -31,6 +33,7 @@ if (function_exists('auth_system_available') && auth_system_available() && !user
 $GLOBALS['pw_view'] = $view;
 $GLOBALS['pw_tool'] = $tool;
 $GLOBALS['pw_load_app_js'] = ($view === 'tools');
+$GLOBALS['pw_load_crm_js'] = in_array($view, ['companies', 'contacts'], true);
 
 $__loggedInName = '';
 if (function_exists('auth_user')) {
@@ -66,6 +69,10 @@ require __DIR__ . '/includes/header.php';
         <?php require __DIR__ . '/modules/bulk-price.php'; ?>
         <?php require __DIR__ . '/modules/shipping-label.php'; ?>
       </div>
+    <?php elseif ($view === 'companies'): ?>
+      <?php require __DIR__ . '/modules/crm-companies.php'; ?>
+    <?php elseif ($view === 'contacts'): ?>
+      <?php require __DIR__ . '/modules/crm-contacts.php'; ?>
     <?php else: ?>
       <?php require __DIR__ . '/modules/dashboard.php'; ?>
     <?php endif; ?>
