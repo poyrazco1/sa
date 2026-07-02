@@ -16,6 +16,8 @@ $viewPerms = [
     'tools'     => 'tools.use',
     'companies' => 'crm.view',
     'contacts'  => 'crm.view',
+    'leads'     => 'crm.view',
+    'opportunities' => 'crm.view',
 ];
 if (!isset($viewPerms[$view])) {
     $view = 'dashboard';
@@ -33,7 +35,7 @@ if (function_exists('auth_system_available') && auth_system_available() && !user
 $GLOBALS['pw_view'] = $view;
 $GLOBALS['pw_tool'] = $tool;
 $GLOBALS['pw_load_app_js'] = ($view === 'tools');
-$GLOBALS['pw_load_crm_js'] = in_array($view, ['companies', 'contacts'], true);
+$GLOBALS['pw_load_crm_js'] = in_array($view, ['companies', 'contacts', 'leads', 'opportunities'], true);
 
 $__loggedInName = '';
 if (function_exists('auth_user')) {
@@ -73,6 +75,10 @@ require __DIR__ . '/includes/header.php';
       <?php require __DIR__ . '/modules/crm-companies.php'; ?>
     <?php elseif ($view === 'contacts'): ?>
       <?php require __DIR__ . '/modules/crm-contacts.php'; ?>
+    <?php elseif ($view === 'leads'): ?>
+      <?php require __DIR__ . '/modules/crm-leads.php'; ?>
+    <?php elseif ($view === 'opportunities'): ?>
+      <?php require __DIR__ . '/modules/crm-opportunities.php'; ?>
     <?php else: ?>
       <?php require __DIR__ . '/modules/dashboard.php'; ?>
     <?php endif; ?>

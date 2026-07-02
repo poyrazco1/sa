@@ -32,6 +32,8 @@ function nav_icon(string $name): string
         'label' => '<path d="M3 8a2 2 0 0 1 2-2h8l7 7-6 6-7-7V8z"/><circle cx="8" cy="10" r="1.4"/>',
         'company' => '<rect x="4" y="3" width="10" height="18" rx="1.5"/><path d="M14 8h5a1 1 0 0 1 1 1v12h-6"/><line x1="7" y1="7" x2="11" y2="7"/><line x1="7" y1="11" x2="11" y2="11"/><line x1="7" y1="15" x2="11" y2="15"/>',
         'contact' => '<circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/>',
+        'lead' => '<path d="M12 2l2.4 5 5.6.6-4.2 3.8 1.2 5.6L12 19.5 6.99 22l1.2-5.6L4 12.6 9.6 12z"/>',
+        'opp' => '<path d="M3 17l5-5 4 3 6-7"/><path d="M17 8h4v4"/>',
     ];
     $body = $p[$name] ?? $p['dashboard'];
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' . $body . '</svg>';
@@ -82,6 +84,12 @@ $activeTool = $isTools ? $pwTool : '';
     </a>
     <a class="navItem<?= $pwView === 'contacts' ? ' active' : '' ?>" href="<?= $baseE ?>/index.php?view=contacts">
       <?= nav_icon('contact') ?><span>Kişiler</span>
+    </a>
+    <a class="navItem<?= $pwView === 'leads' ? ' active' : '' ?>" href="<?= $baseE ?>/index.php?view=leads">
+      <?= nav_icon('lead') ?><span>Lead'ler</span>
+    </a>
+    <a class="navItem<?= $pwView === 'opportunities' ? ' active' : '' ?>" href="<?= $baseE ?>/index.php?view=opportunities">
+      <?= nav_icon('opp') ?><span>Fırsatlar</span>
     </a>
   </nav>
   <?php endif; ?>

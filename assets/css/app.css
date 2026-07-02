@@ -768,6 +768,13 @@ body.app{padding:0}
 .crmContactItem{border:1px solid var(--line);border-radius:var(--radius-sm);padding:11px 13px;background:var(--surface-2)}
 .crmContactItem b{display:block;color:var(--ink);font-weight:600;font-size:14px}
 .crmContactItem span{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.crmFilter{width:auto;flex:none;min-width:160px}
+.crmBadge{display:inline-block;font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:var(--radius-pill);border:1px solid transparent;white-space:nowrap}
+.crmBadge-muted{color:var(--muted);background:var(--surface-3);border-color:var(--line)}
+.crmBadge-accent{color:var(--accent-ink);background:var(--accent-soft);border-color:var(--accent-line)}
+.crmBadge-ok{color:var(--ok);background:var(--ok-soft);border-color:var(--ok-line)}
+.crmBadge-warn{color:var(--warn);background:var(--warn-soft);border-color:var(--warn-line)}
+.crmBadge-bad{color:var(--bad);background:var(--bad-soft);border-color:var(--bad-line)}
 
 @media(max-width:980px){
   .appShell{grid-template-columns:1fr}

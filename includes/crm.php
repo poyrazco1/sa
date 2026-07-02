@@ -77,6 +77,44 @@ function crm_str(array $src, string $key, int $max = 255): string
     return mb_substr($v, 0, $max);
 }
 
+/** Değeri izinli listeye kısıtla; değilse varsayılan. */
+function crm_enum(array $src, string $key, array $allowed, string $default): string
+{
+    $v = isset($src[$key]) ? trim((string)$src[$key]) : '';
+    return in_array($v, $allowed, true) ? $v : $default;
+}
+
+/** Ondalık sayı (nokta/virgül toleranslı); boşsa null. */
+function crm_decimal(array $src, string $key): ?float
+{
+    if (!isset($src[$key]) || trim((string)$src[$key]) === '') {
+        return null;
+    }
+    $v = str_replace([' ', ','], ['', '.'], (string)$src[$key]);
+    return is_numeric($v) ? (float)$v : null;
+}
+
+/** 0-100 arası tam sayı olasılık; boşsa null. */
+function crm_prob(array $src, string $key): ?int
+{
+    $v = crm_decimal($src, $key);
+    if ($v === null) {
+        return null;
+    }
+    return max(0, min(100, (int)round($v)));
+}
+
+/** Tarih (YYYY-MM-DD) doğrula; geçersizse null. */
+function crm_date(array $src, string $key): ?string
+{
+    $v = isset($src[$key]) ? trim((string)$src[$key]) : '';
+    if ($v === '') {
+        return null;
+    }
+    $d = DateTime::createFromFormat('Y-m-d', $v);
+    return ($d && $d->format('Y-m-d') === $v) ? $v : null;
+}
+
 /** İsteğin durum-değiştiren gövdesini oku (JSON). */
 function crm_input(): array
 {

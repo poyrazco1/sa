@@ -57,11 +57,82 @@
         { k: 'note', label: 'Kısa not' }
       ],
       hasDetail: false
+    },
+    leads: {
+      endpoint: 'api/crm_leads.php',
+      title: 'Lead',
+      plural: 'Lead\'ler',
+      hint: 'Potansiyel müşteri adaylarını takip et; nitelikli olanları fırsata çevir.',
+      filter: { param: 'status', options: [['', 'Tüm durumlar'], ['new', 'Yeni'], ['contacted', 'İletişim kuruldu'], ['qualified', 'Nitelikli'], ['won', 'Kazanıldı'], ['lost', 'Kaybedildi']] },
+      columns: [
+        { key: 'title', label: 'Başlık', strong: true },
+        { key: 'company_name', label: 'Firma' },
+        { key: 'contact_name', label: 'Kişi' },
+        { key: 'status', label: 'Durum', badge: 'lead' },
+        { key: 'est_value', label: 'Değer', money: true },
+        { key: 'owner_name', label: 'Sahip' }
+      ],
+      fields: [
+        { k: 'title', label: 'Başlık *', req: true },
+        { k: 'company_id', label: 'Firma', type: 'company' },
+        { k: 'contact_name', label: 'Kişi adı' },
+        { k: 'phone', label: 'Telefon' },
+        { k: 'email', label: 'E-posta' },
+        { k: 'status', label: 'Durum', type: 'select', options: [['new', 'Yeni'], ['contacted', 'İletişim kuruldu'], ['qualified', 'Nitelikli'], ['won', 'Kazanıldı'], ['lost', 'Kaybedildi']] },
+        { k: 'source', label: 'Kaynak' },
+        { k: 'est_value', label: 'Tahmini değer (TL)', type: 'number' },
+        { k: 'note', label: 'Not', textarea: true }
+      ],
+      rowActions: [{ label: 'Fırsata çevir', action: 'convert', cls: 'ghost', confirm: 'Bu lead bir fırsata çevrilsin mi?', done: 'Fırsata çevrildi', when: function (r) { return r.status !== 'won' && r.status !== 'lost'; } }],
+      hasDetail: false
+    },
+    opportunities: {
+      endpoint: 'api/crm_opportunities.php',
+      title: 'Fırsat',
+      plural: 'Fırsatlar',
+      hint: 'Satış hunisindeki fırsatları aşamalarıyla ve tutarlarıyla yönet.',
+      filter: { param: 'stage', options: [['', 'Tüm aşamalar'], ['new', 'Yeni'], ['qualified', 'Nitelikli'], ['proposal', 'Teklif'], ['won', 'Kazanıldı'], ['lost', 'Kaybedildi']] },
+      columns: [
+        { key: 'title', label: 'Başlık', strong: true },
+        { key: 'company_name', label: 'Firma' },
+        { key: 'stage', label: 'Aşama', badge: 'stage' },
+        { key: 'amount', label: 'Tutar', money: true },
+        { key: 'probability', label: 'Olasılık', pct: true },
+        { key: 'owner_name', label: 'Sahip' }
+      ],
+      fields: [
+        { k: 'title', label: 'Başlık *', req: true },
+        { k: 'company_id', label: 'Firma', type: 'company' },
+        { k: 'stage', label: 'Aşama', type: 'select', options: [['new', 'Yeni'], ['qualified', 'Nitelikli'], ['proposal', 'Teklif'], ['won', 'Kazanıldı'], ['lost', 'Kaybedildi']] },
+        { k: 'amount', label: 'Tutar (TL)', type: 'number' },
+        { k: 'probability', label: 'Olasılık (%)', type: 'number' },
+        { k: 'expected_close_date', label: 'Beklenen kapanış', type: 'date' },
+        { k: 'note', label: 'Not', textarea: true }
+      ],
+      hasDetail: false
     }
   };
 
   var cfg = CONFIGS[view] || CONFIGS.companies;
-  var companyOptions = null; // kişi formundaki firma seçenekleri (lazy)
+  var companyOptions = null; // firma seçenekleri (lazy)
+
+  var BADGES = {
+    lead: { new: ['Yeni', 'muted'], contacted: ['İletişim', 'accent'], qualified: ['Nitelikli', 'accent'], won: ['Kazanıldı', 'ok'], lost: ['Kaybedildi', 'bad'] },
+    stage: { new: ['Yeni', 'muted'], qualified: ['Nitelikli', 'accent'], proposal: ['Teklif', 'warn'], won: ['Kazanıldı', 'ok'], lost: ['Kaybedildi', 'bad'] }
+  };
+  function badge(kind, val) {
+    var m = (BADGES[kind] || {})[val] || [val || '—', 'muted'];
+    var s = document.createElement('span');
+    s.className = 'crmBadge crmBadge-' + m[1];
+    s.textContent = m[0];
+    return s;
+  }
+  function money(v) {
+    if (v == null || v === '') return '—';
+    var num = Number(v);
+    if (isNaN(num)) return '—';
+    return '₺' + num.toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  }
 
   /* ---- küçük DOM yardımcıları ---- */
   function el(tag, cls, text) {
@@ -102,6 +173,18 @@
   searchWrap.appendChild(search);
   searchWrap.appendChild(searchBtn);
   toolbar.appendChild(searchWrap);
+
+  var filterSel = null;
+  if (cfg.filter) {
+    filterSel = el('select', 'crmFilter');
+    cfg.filter.options.forEach(function (o) {
+      var op = el('option', null, o[1]);
+      op.value = o[0];
+      filterSel.appendChild(op);
+    });
+    filterSel.onchange = function () { loadList(); };
+    searchWrap.appendChild(filterSel);
+  }
 
   var formBox = el('div', 'customerBox hide');
   var errBox = el('div', 'error');
@@ -151,6 +234,20 @@
         opt0.value = '';
         inp.appendChild(opt0);
         if (companyOptions) fillCompanyOptions(inp);
+      } else if (f.type === 'select') {
+        inp = el('select');
+        (f.options || []).forEach(function (o) {
+          var op = el('option', null, o[1]);
+          op.value = o[0];
+          inp.appendChild(op);
+        });
+      } else if (f.type === 'number') {
+        inp = el('input');
+        inp.type = 'text';
+        inp.inputMode = 'decimal';
+      } else if (f.type === 'date') {
+        inp = el('input');
+        inp.type = 'date';
       } else {
         inp = el('input');
         inp.type = 'text';
@@ -245,9 +342,13 @@
   /* ---- liste ---- */
   function loadList() {
     var q = encodeURIComponent(search.value.trim());
+    var url = cfg.endpoint + '?action=list&q=' + q;
+    if (cfg.filter && filterSel && filterSel.value) {
+      url += '&' + encodeURIComponent(cfg.filter.param) + '=' + encodeURIComponent(filterSel.value);
+    }
     clear(tbody);
     tbody.appendChild(rowMsg('Yükleniyor…'));
-    j(cfg.endpoint + '?action=list&q=' + q).then(function (r) {
+    j(url).then(function (r) {
       clear(tbody);
       if (!r || !r.ok) { tbody.appendChild(rowMsg((r && r.message) || 'Liste alınamadı.')); return; }
       if (!r.data.length) { tbody.appendChild(rowMsg('Kayıt yok. “+ Yeni ' + cfg.title.toLowerCase() + '” ile ekle.')); return; }
@@ -269,7 +370,10 @@
     cfg.columns.forEach(function (c) {
       var td = el('td');
       var val = row[c.key];
-      if (c.num) { td.textContent = val != null ? val : '0'; }
+      if (c.badge) { td.appendChild(badge(c.badge, val || '')); }
+      else if (c.money) { td.textContent = money(val); td.style.fontVariantNumeric = 'tabular-nums'; }
+      else if (c.pct) { td.textContent = (val == null || val === '') ? '—' : (val + '%'); td.style.fontVariantNumeric = 'tabular-nums'; }
+      else if (c.num) { td.textContent = val != null ? val : '0'; }
       else if (c.detail && cfg.hasDetail) {
         var a = el('a', null, val || '—');
         a.href = '#';
@@ -288,6 +392,15 @@
     });
     var actTd = el('td');
     actTd.style.whiteSpace = 'nowrap';
+    (cfg.rowActions || []).forEach(function (ra) {
+      if (ra.when && !ra.when(row)) return;
+      var rb = el('button', ra.cls || 'ghost', ra.label);
+      rb.type = 'button';
+      rb.style.padding = '7px 12px';
+      rb.style.marginRight = '6px';
+      rb.onclick = function () { doRowAction(ra, row); };
+      actTd.appendChild(rb);
+    });
     var edit = el('button', 'ghost', 'Düzenle');
     edit.type = 'button';
     edit.style.padding = '7px 12px';
@@ -301,6 +414,18 @@
     actTd.appendChild(del);
     tr.appendChild(actTd);
     return tr;
+  }
+
+  function doRowAction(ra, row) {
+    if (ra.confirm && !window.confirm(ra.confirm)) return;
+    j(cfg.endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: ra.action, id: row.id })
+    }).then(function (r) {
+      if (r && r.ok) { toast(r.message || ra.done || 'Tamam'); loadList(); }
+      else { alert((r && r.message) || 'İşlem başarısız.'); }
+    }).catch(function () { alert('Bağlantı hatası.'); });
   }
 
   function removeRow(row) {
