@@ -1,9 +1,34 @@
-# Akıllı Fiyat Sihirbazı — PHP v79
+# Akıllı Fiyat Sihirbazı + CRM — PHP v80
 
-Plain PHP 8.2+ / MySQL (MariaDB 10.6+) / Plesk uyumlu fiyatlama ve kargo etiketi paneli.
-Framework, Composer, Node veya build sistemi **gerektirmez**. ZIP'i sunucuya atıp çalışır.
+Plain PHP 8.2+ / MySQL (MariaDB 10.6+) / Plesk uyumlu fiyatlama, kargo etiketi ve
+**CRM operasyon paneli**. Framework, Composer, Node veya build sistemi **gerektirmez**.
+ZIP'i sunucuya atıp çalışır.
 
 > Sürüm geçmişi için bkz. [CHANGELOG.md](CHANGELOG.md).
+
+## CRM & Yönetim (v80)
+
+Panel gerçek **DB tabanlı giriş + rol/yetki (RBAC)** ve bir **CRM** ile genişletildi.
+
+- **Giriş:** `login.php` (bcrypt). İlk kullanıcı: **`admin` / `Admin1234!`** — ilk girişte
+  parola değişimi zorunlu. Roller: admin, manager (müdür), sales (temsilci), viewer.
+- **Dashboard:** bu ay fiyat/satış/net kâr, açık fırsat/görev, satış hunisi, son
+  aktiviteler, yaklaşan görevler, canlı kur.
+- **CRM modülleri:** Firmalar, Kişiler, Lead'ler, Fırsatlar (lead→fırsat dönüşümü),
+  Teklifler (kalemli, KDV dahil toplam, T-Soft ürün köprüsü), Görevler (termin/hatırlatma).
+- **Firma kartı:** bağlı kişiler, geçmiş (aktivite), **kargo gönderileri** (ad/telefon
+  eşleşmeli), not ekleme, tek tıkla kargo müşteri listesine ekleme.
+- **Yönetim (admin):** genel ayarlar (KDV, sarf gideri, kargo eşiği, gönderici), ödeme
+  oranları, kargo firmaları + tarifeleri, kullanıcı & rol yönetimi.
+- **Güvenlik:** her API'de server-side yetki (`require_permission_api`), yazma
+  isteklerinde **CSRF token** (`assets/js/csrf.js`, `app.js`'e dokunmadan), prepared
+  statement, HTML escape. Gizli bilgi/token frontend'e basılmaz.
+- **Navigasyon:** sol sidebar + `index.php?view=` router. Mevcut 3 araç (Akıllı Fiyat /
+  Toplu Fiyat / Kargo Etiketi) **aynen** korunur; `app.js` ve hesaplama mantığı **hiç
+  değişmedi** (git ile doğrulandı). CRM ekranları ayrı `crm.js`/`quotes.js`/`admin.js`.
+- **DB:** `database/install.sql` yeni CRM/RBAC tablolarını içerir; ayrıca uygulama
+  `includes/db_migrate.php` ile eksik tabloları/kolonları güvenli `ALTER` ile otomatik
+  tamamlar (mevcut veri bozulmaz, DROP/TRUNCATE yok).
 
 ## Arayüz (v79 — yeniden tasarım)
 

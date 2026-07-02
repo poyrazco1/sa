@@ -2,6 +2,53 @@
 
 Bu proje "Akıllı Fiyat Sihirbazı" PHP panelidir. Sürüm adları paket klasör adıyla eşleşir.
 
+## v80 — CRM + RBAC dönüşümü (SaaS operasyon paneli)
+
+Panel; gerçek giriş/rol sistemi, dashboard ve CRM modülleriyle genişletildi. Mevcut
+araçlar (Akıllı Fiyat / Toplu Fiyat / Kargo Etiketi), hesaplama mantığı ve kargo etiketi
+baskısı **korundu**; `assets/js/app.js` ve print CSS **hiç değişmedi**.
+
+**Part 1 — Şema/migration:** CRM/RBAC tabloları (`roles, role_permissions, users,
+companies, contacts, leads, opportunities, quotes, quote_items, tasks, notes, activities`)
++ seed admin; `includes/db_migrate.php` ile geriye uyumlu self-healing migration.
+
+**Part 2 — Auth & RBAC:** `includes/auth.php` (bcrypt login, oturum, yetki, CSRF),
+`login.php`/`logout.php`/`account.php`; DB yoksa legacy koda güvenli düşüş; yazma
+uçlarında CSRF (`assets/js/csrf.js`).
+
+**Part 3 — SaaS shell:** sol sidebar + `?view=` router; araçlar tek sayfada korunarak
+taşındı; `app.js` yalnız araç görünümünde yüklenir.
+
+**Part 4 — Dashboard KPI:** `includes/dashboard_data.php` + `api/dashboard_stats.php`;
+fiyat/CRM özetleri, satış hunisi, son aktiviteler.
+
+**Part 5 — Firmalar + Kişiler:** `api/crm_companies.php`, `api/crm_contacts.php`,
+`assets/js/crm.js` (jenerik motor), firma detay kartı.
+
+**Part 6 — Lead + Fırsat:** `api/crm_leads.php` (lead→fırsat dönüşümü),
+`api/crm_opportunities.php`; durum/aşama filtreleri, badge kolonları.
+
+**Part 7 — Teklif:** `api/crm_quotes.php` + `assets/js/quotes.js`; kalemli editör,
+sunucu tarafı KDV/toplam, T-Soft ürün köprüsü; `price_calculation_logs` CRM bağ kolonları.
+
+**Part 8 — Görev/Not/Aktivite:** `api/crm_tasks.php`, `api/crm_notes.php`; termin/
+hatırlatma, tamamlama, firma detayına not; dashboard "yaklaşan görevler".
+
+**Part 9 — Yönetim:** `api/settings_api.php` (ayarlar/ödeme/kargo/tarife),
+`api/users_api.php` (kullanıcı & rol; son-admin koruması), `assets/js/admin.js`.
+
+**Part 10 — Kargo ↔ CRM:** `shipping_label_save.php` CRM bağ kolonları; firma kartında
+kargo gönderileri (ad/telefon eşleşmeli) + "müşteri listesine ekle".
+
+**Part 11 — QA & teslim:** 53 PHP `php -l` temiz, 6 JS syntax temiz, CSS dengeli,
+`install.sql` MySQL dialektinde geçerli, 9 görünüm + giriş sayfaları JS-hatasız render,
+`app.js` byte-değişmedi (git ile doğrulandı), CRM SQL sqlglot + SQLite ile doğrulandı.
+
+**DB notu:** `database/install.sql` güncellendi (yeni CRM/RBAC tabloları). Mevcut
+kurulumlarda uygulama şemayı otomatik tamamlar; istenirse `install.sql` yeniden import
+edilebilir (idempotent, veri kaybı yok).
+
+
 ## v79 — Arayüz yeniden tasarımı (SaaS operasyon paneli)
 
 ### Tasarım
