@@ -13,4 +13,4 @@ if (!defined('APP_BOOTSTRAPPED')) {
   <title><?= htmlspecialchars(APP_NAME, ENT_QUOTES, 'UTF-8') ?></title>
   <link rel="stylesheet" href="assets/css/app.css?v=80" />
 </head>
-<body>
+<body class="app">

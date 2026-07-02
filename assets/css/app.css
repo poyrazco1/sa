@@ -655,6 +655,89 @@ tr.selected td{background:var(--ok-soft)!important}
 .authStrip .authActions a:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
 
 /* ============================================================
+   APP SHELL — sidebar + main (SaaS layout)
+   ============================================================ */
+body.app{padding:0}
+.appShell{display:grid;grid-template-columns:250px minmax(0,1fr);min-height:100vh}
+
+.sideNav{
+  background:var(--surface);border-right:1px solid var(--line);
+  display:flex;flex-direction:column;gap:6px;
+  position:sticky;top:0;height:100vh;overflow-y:auto;padding:18px 14px;
+}
+.sideBrand{display:flex;align-items:center;gap:11px;padding:6px 8px 16px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.sideBrand .mark{width:9px;height:26px;border-radius:3px;background:linear-gradient(180deg,var(--accent),var(--accent-2));flex:none}
+.sideBrand .txt{display:flex;flex-direction:column;min-width:0}
+.sideBrand .txt b{font-family:var(--display);font-size:15px;font-weight:700;color:var(--ink);letter-spacing:-.01em;line-height:1.15}
+.sideBrand .txt span{font-size:11px;color:var(--muted);font-weight:500}
+
+.navGroup{padding:8px 8px 4px}
+.navGroup .navLabel{font-size:10.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);margin-bottom:6px}
+.navItem{
+  display:flex;align-items:center;gap:10px;text-decoration:none;
+  padding:9px 11px;border-radius:var(--radius-sm);color:var(--ink-2);font-weight:600;font-size:14px;
+  transition:.12s ease;margin-bottom:2px;border:1px solid transparent;
+}
+.navItem svg{width:18px;height:18px;flex:none;color:var(--faint);transition:.12s ease}
+.navItem:hover{background:var(--surface-2);color:var(--ink)}
+.navItem:hover svg{color:var(--muted)}
+.navItem.active{background:var(--accent-soft);color:var(--accent-ink);border-color:var(--accent-line)}
+.navItem.active svg{color:var(--accent)}
+
+.sideUser{margin-top:auto;border-top:1px solid var(--line);padding-top:12px}
+.sideUser .who{display:flex;flex-direction:column;gap:2px;padding:4px 8px 10px}
+.sideUser .who b{font-size:14px;color:var(--ink);font-weight:600}
+.sideUser .who .role{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--accent-ink)}
+.sideUser .acts{display:flex;gap:6px}
+.sideUser .acts a{
+  flex:1;text-align:center;text-decoration:none;font-size:12.5px;font-weight:600;color:var(--ink-2);
+  border:1px solid var(--line-2);background:var(--surface);border-radius:var(--radius-sm);padding:8px 10px;transition:.12s ease;
+}
+.sideUser .acts a:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.sideUser .acts a.logout:hover{border-color:var(--bad);color:var(--bad);background:var(--bad-soft)}
+
+.mainArea{min-width:0;padding:24px 26px 56px;position:relative}
+.navToggle{
+  display:none;align-items:center;justify-content:center;gap:8px;width:auto;min-height:42px;
+  margin-bottom:16px;border:1px solid var(--line-2);background:var(--surface);border-radius:var(--radius-sm);
+  padding:9px 14px;font-weight:600;color:var(--ink-2);cursor:pointer;
+}
+.navScrim{display:none}
+
+/* Dashboard */
+.pageHead{margin-bottom:20px}
+.pageHead h1{font-family:var(--display);font-size:clamp(22px,2.2vw,28px);font-weight:700;letter-spacing:-.02em;color:var(--ink);margin:0;display:block}
+.pageHead h1::before{content:none}
+.pageHead p{margin:6px 0 0;color:var(--muted);font-size:14px}
+.dashGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:22px}
+.statCard{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow-sm)}
+.statCard .statLabel{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:10px}
+.statCard .statValue{font-size:28px;font-weight:700;font-family:var(--display);color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.statCard .statSub{font-size:12px;color:var(--muted);margin-top:6px}
+.quickGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.quickCard{
+  display:flex;align-items:center;gap:14px;text-decoration:none;background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--radius);padding:18px;transition:.14s ease;box-shadow:var(--shadow-sm);
+}
+.quickCard:hover{border-color:var(--accent);box-shadow:var(--shadow);transform:translateY(-1px)}
+.quickCard .qIcon{width:44px;height:44px;flex:none;border-radius:12px;display:flex;align-items:center;justify-content:center;background:var(--accent-soft);color:var(--accent)}
+.quickCard .qIcon svg{width:22px;height:22px}
+.quickCard .qText b{display:block;color:var(--ink);font-size:15px;font-weight:700}
+.quickCard .qText span{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+
+@media(max-width:980px){
+  .appShell{grid-template-columns:1fr}
+  .sideNav{
+    position:fixed;left:0;top:0;bottom:0;height:100vh;width:270px;z-index:70;
+    transform:translateX(-100%);transition:transform .2s ease;box-shadow:var(--shadow-lg);
+  }
+  .appShell.navOpen .sideNav{transform:translateX(0)}
+  .appShell.navOpen .navScrim{display:block;position:fixed;inset:0;background:rgba(15,23,42,.42);z-index:60}
+  .navToggle{display:inline-flex}
+  .mainArea{padding:18px 16px 44px}
+}
+
+/* ============================================================
    17. RESPONSIVE
    ============================================================ */
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
