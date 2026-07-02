@@ -21,6 +21,11 @@ try {
             id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             user_name VARCHAR(120) NULL,
+            user_id BIGINT UNSIGNED NULL,
+            company_id BIGINT UNSIGNED NULL,
+            contact_id BIGINT UNSIGNED NULL,
+            opportunity_id BIGINT UNSIGNED NULL,
+            quote_id BIGINT UNSIGNED NULL,
             sold TINYINT(1) NOT NULL DEFAULT 0,
             sold_label VARCHAR(40) NULL,
             currency VARCHAR(10) NOT NULL,
@@ -61,7 +66,8 @@ try {
 
     $stmt = $pdo->prepare("
         INSERT INTO price_calculation_logs (
-            user_name, sold, sold_label, currency, payment_code, payment_label,
+            user_name, user_id, company_id, contact_id, opportunity_id, quote_id,
+            sold, sold_label, currency, payment_code, payment_label,
             cost_input, profit_percent, carrier_code, carrier_label, desi,
             sale_ex_try, sale_inc_try, collected_ex_try, collected_inc_try,
             net_profit_try, cargo_try, customer_cargo_try, customer_total_ex_try,
@@ -69,7 +75,8 @@ try {
             usd_try_rate, eur_try_rate, rates_source,
             sale_ex_text, sale_inc_text, customer_total_ex_text, payload
         ) VALUES (
-            :user_name, :sold, :sold_label, :currency, :payment_code, :payment_label,
+            :user_name, :user_id, :company_id, :contact_id, :opportunity_id, :quote_id,
+            :sold, :sold_label, :currency, :payment_code, :payment_label,
             :cost_input, :profit_percent, :carrier_code, :carrier_label, :desi,
             :sale_ex_try, :sale_inc_try, :collected_ex_try, :collected_inc_try,
             :net_profit_try, :cargo_try, :customer_cargo_try, :customer_total_ex_try,
@@ -79,8 +86,14 @@ try {
         )
     ");
 
+    $__pwUser = (function_exists('auth_user') ? auth_user() : null);
     $stmt->execute([
         ':user_name' => (string)($data['userName'] ?? ''),
+        ':user_id' => $__pwUser ? (int)$__pwUser['id'] : (((int)($data['user_id'] ?? 0)) ?: null),
+        ':company_id' => ((int)($data['company_id'] ?? 0)) ?: null,
+        ':contact_id' => ((int)($data['contact_id'] ?? 0)) ?: null,
+        ':opportunity_id' => ((int)($data['opportunity_id'] ?? 0)) ?: null,
+        ':quote_id' => ((int)($data['quote_id'] ?? 0)) ?: null,
         ':sold' => !empty($data['sold']) ? 1 : 0,
         ':sold_label' => (string)($data['soldLabel'] ?? ''),
         ':currency' => (string)($data['currency'] ?? 'TL'),

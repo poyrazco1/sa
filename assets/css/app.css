@@ -776,6 +776,27 @@ body.app{padding:0}
 .crmBadge-warn{color:var(--warn);background:var(--warn-soft);border-color:var(--warn-line)}
 .crmBadge-bad{color:var(--bad);background:var(--bad-soft);border-color:var(--bad-line)}
 
+/* Teklif editörü */
+.quoteItems{min-width:640px}
+.quoteItems th{font-size:11px}
+.quoteItems td{padding:6px 8px}
+.quoteItems input{min-height:38px;padding:8px 10px}
+.quoteItems th:first-child,.quoteItems td:first-child{text-align:left}
+.quoteItems th:not(:first-child),.quoteItems td:not(:first-child){text-align:right}
+.quoteAddBar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0}
+.quoteAddBar button{width:auto}
+.quoteTsInput{flex:1;min-width:200px}
+.quoteTsResults{display:grid;gap:6px;margin-bottom:8px}
+.quoteTsItem{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--line);background:var(--surface-2);border-radius:var(--radius-sm);padding:9px 12px}
+.quoteTsItem b{display:block;color:var(--ink);font-size:13.5px;font-weight:600}
+.quoteTsItem span{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.quoteTsItem button{width:auto;flex:none}
+.quoteTotals{margin:14px 0 4px;margin-left:auto;max-width:340px;display:grid;gap:6px}
+.quoteTotalRow{display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:13.5px;color:var(--muted)}
+.quoteTotalRow b{color:var(--ink);font-family:var(--display);font-variant-numeric:tabular-nums;font-weight:700}
+.quoteTotalRow.grand{border-top:1px solid var(--line);padding-top:8px;margin-top:2px;font-size:16px;color:var(--ink);font-weight:700}
+.quoteTotalRow.grand b{font-size:18px;color:var(--accent-ink)}
+
 @media(max-width:980px){
   .appShell{grid-template-columns:1fr}
   .sideNav{
