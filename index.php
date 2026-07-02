@@ -20,6 +20,7 @@ $viewPerms = [
     'opportunities' => 'crm.view',
     'quotes'    => 'crm.view',
     'tasks'     => 'crm.view',
+    'admin'     => 'admin.settings',
 ];
 if (!isset($viewPerms[$view])) {
     $view = 'dashboard';
@@ -39,6 +40,7 @@ $GLOBALS['pw_tool'] = $tool;
 $GLOBALS['pw_load_app_js'] = ($view === 'tools');
 $GLOBALS['pw_load_crm_js'] = in_array($view, ['companies', 'contacts', 'leads', 'opportunities', 'tasks'], true);
 $GLOBALS['pw_load_quotes_js'] = ($view === 'quotes');
+$GLOBALS['pw_load_admin_js'] = ($view === 'admin');
 
 $__loggedInName = '';
 if (function_exists('auth_user')) {
@@ -86,6 +88,8 @@ require __DIR__ . '/includes/header.php';
       <?php require __DIR__ . '/modules/crm-quotes.php'; ?>
     <?php elseif ($view === 'tasks'): ?>
       <?php require __DIR__ . '/modules/crm-tasks.php'; ?>
+    <?php elseif ($view === 'admin'): ?>
+      <?php require __DIR__ . '/modules/admin.php'; ?>
     <?php else: ?>
       <?php require __DIR__ . '/modules/dashboard.php'; ?>
     <?php endif; ?>

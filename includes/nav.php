@@ -36,6 +36,7 @@ function nav_icon(string $name): string
         'opp' => '<path d="M3 17l5-5 4 3 6-7"/><path d="M17 8h4v4"/>',
         'quote' => '<path d="M6 2h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/><path d="M14 2v5h5"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/>',
         'task' => '<rect x="3" y="4" width="18" height="17" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><path d="M8 13l2 2 4-4"/>',
+        'admin' => '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-2.82 1.17V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 8 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 3.6 15H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6h.09A1.65 1.65 0 0 0 11 3.09V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 16 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 20.4 9v.09A1.65 1.65 0 0 0 21 11h.09a2 2 0 0 1 0 4H21z"/>',
     ];
     $body = $p[$name] ?? $p['dashboard'];
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' . $body . '</svg>';
@@ -98,6 +99,15 @@ $activeTool = $isTools ? $pwTool : '';
     </a>
     <a class="navItem<?= $pwView === 'tasks' ? ' active' : '' ?>" href="<?= $baseE ?>/index.php?view=tasks">
       <?= nav_icon('task') ?><span>Görevler</span>
+    </a>
+  </nav>
+  <?php endif; ?>
+
+  <?php if ($can('admin.settings')): ?>
+  <nav class="navGroup" aria-label="Yönetim">
+    <div class="navLabel">Yönetim</div>
+    <a class="navItem<?= $pwView === 'admin' ? ' active' : '' ?>" href="<?= $baseE ?>/index.php?view=admin">
+      <?= nav_icon('admin') ?><span>Ayarlar</span>
     </a>
   </nav>
   <?php endif; ?>
