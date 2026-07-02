@@ -768,6 +768,16 @@ body.app{padding:0}
 .crmContactItem{border:1px solid var(--line);border-radius:var(--radius-sm);padding:11px 13px;background:var(--surface-2)}
 .crmContactItem b{display:block;color:var(--ink);font-weight:600;font-size:14px}
 .crmContactItem span{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.crmNoteBox{display:grid;gap:10px}
+.crmNoteBox textarea{min-height:80px}
+.crmNoteBox button{width:auto;justify-self:end}
+.dashTaskList{display:grid;gap:2px}
+.dashTaskRow{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
+.dashTaskRow:first-child{border-top:0}
+.dashTaskRow .tTitle{font-size:13.5px;font-weight:600;color:var(--ink)}
+.dashTaskRow .tWho{font-size:12px;color:var(--muted)}
+.dashTaskRow .tDue{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.dashTaskRow .tDue.overdue{color:var(--bad);font-weight:700}
 .crmFilter{width:auto;flex:none;min-width:160px}
 .crmBadge{display:inline-block;font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:var(--radius-pill);border:1px solid transparent;white-space:nowrap}
 .crmBadge-muted{color:var(--muted);background:var(--surface-3);border-color:var(--line)}

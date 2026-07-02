@@ -119,12 +119,42 @@ function dashboard_stats(?PDO $pdo): array
         }
     }
 
+    // Yaklaşan / geciken açık görevler
+    $upcoming = [];
+    if ($pdo instanceof PDO) {
+        try {
+            $rows = $pdo->query("
+                SELECT t.id, t.title, t.due_at, t.priority,
+                       u.full_name AS assigned_name,
+                       CASE WHEN t.due_at IS NOT NULL AND t.due_at < NOW() THEN 1 ELSE 0 END AS overdue
+                FROM tasks t
+                LEFT JOIN users u ON u.id = t.assigned_user_id
+                WHERE t.status = 'open'
+                ORDER BY (t.due_at IS NULL) ASC, t.due_at ASC, t.id DESC
+                LIMIT 6
+            ")->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($rows as $r) {
+                $upcoming[] = [
+                    'id' => (int)$r['id'],
+                    'title' => (string)$r['title'],
+                    'due_at' => (string)($r['due_at'] ?? ''),
+                    'priority' => (string)($r['priority'] ?? ''),
+                    'assigned_name' => (string)($r['assigned_name'] ?? ''),
+                    'overdue' => (int)$r['overdue'] === 1,
+                ];
+            }
+        } catch (Throwable $e) {
+            $upcoming = [];
+        }
+    }
+
     return [
         'price' => $price,
         'labels' => $labels,
         'crm' => $crm,
         'pipeline' => $pipeline,
         'recent' => $recent,
+        'upcoming_tasks' => $upcoming,
         'db_ready' => $pdo instanceof PDO,
         'generated_at' => date('Y-m-d H:i:s'),
     ];

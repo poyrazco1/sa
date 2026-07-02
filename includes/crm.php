@@ -115,6 +115,23 @@ function crm_date(array $src, string $key): ?string
     return ($d && $d->format('Y-m-d') === $v) ? $v : null;
 }
 
+/** Tarih-saat doğrula (datetime-local 'Y-m-d\TH:i' veya 'Y-m-d H:i[:s]'); 'Y-m-d H:i:s' döner. */
+function crm_datetime(array $src, string $key): ?string
+{
+    $v = isset($src[$key]) ? trim((string)$src[$key]) : '';
+    if ($v === '') {
+        return null;
+    }
+    $v = str_replace('T', ' ', $v);
+    foreach (['Y-m-d H:i:s', 'Y-m-d H:i'] as $fmt) {
+        $d = DateTime::createFromFormat($fmt, $v);
+        if ($d) {
+            return $d->format('Y-m-d H:i:s');
+        }
+    }
+    return null;
+}
+
 /** İsteğin durum-değiştiren gövdesini oku (JSON). */
 function crm_input(): array
 {

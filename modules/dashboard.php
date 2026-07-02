@@ -128,6 +128,29 @@ $stageOrder = ['new', 'qualified', 'proposal', 'won', 'lost'];
     </div>
   </div>
 
+  <div class="statCard" style="margin-bottom:22px">
+    <div class="statLabel" style="margin-bottom:14px">Yaklaşan görevler</div>
+    <?php if (empty($stats['upcoming_tasks'])): ?>
+      <div class="labelHint">Açık görev yok. CRM &rsaquo; Görevler bölümünden ekleyebilirsin.</div>
+    <?php else:
+      $prioMap = ['low' => ['Düşük', 'muted'], 'normal' => ['Normal', 'accent'], 'high' => ['Yüksek', 'bad']]; ?>
+      <div class="dashTaskList">
+        <?php foreach ($stats['upcoming_tasks'] as $t):
+          $pr = $prioMap[$t['priority']] ?? ['—', 'muted'];
+          $due = $t['due_at'] !== '' ? substr(str_replace('T', ' ', $t['due_at']), 0, 16) : 'Termin yok'; ?>
+        <div class="dashTaskRow">
+          <div>
+            <div class="tTitle"><?= htmlspecialchars($t['title'], ENT_QUOTES, 'UTF-8') ?></div>
+            <?php if ($t['assigned_name'] !== ''): ?><div class="tWho"><?= htmlspecialchars($t['assigned_name'], ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?>
+          </div>
+          <span class="crmBadge crmBadge-<?= $pr[1] ?>"><?= htmlspecialchars($pr[0], ENT_QUOTES, 'UTF-8') ?></span>
+          <span class="tDue<?= $t['overdue'] ? ' overdue' : '' ?>"><?= htmlspecialchars($due, ENT_QUOTES, 'UTF-8') ?></span>
+        </div>
+        <?php endforeach; ?>
+      </div>
+    <?php endif; ?>
+  </div>
+
   <div class="pageHead" style="margin-bottom:14px"><h1 style="font-size:18px">Hızlı işlemler</h1></div>
   <div class="quickGrid">
     <a class="quickCard" href="<?= $baseE ?>/index.php?view=tools&amp;tool=price">

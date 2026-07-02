@@ -110,16 +110,61 @@
         { k: 'note', label: 'Not', textarea: true }
       ],
       hasDetail: false
+    },
+    tasks: {
+      endpoint: 'api/crm_tasks.php',
+      title: 'Görev',
+      plural: 'Görevler',
+      hint: 'Yapılacakları ve hatırlatmaları takip et; tamamlandıkça işaretle.',
+      filter: { param: 'status', options: [['', 'Tümü'], ['open', 'Açık'], ['done', 'Tamamlanan']] },
+      columns: [
+        { key: 'title', label: 'Görev', strong: true },
+        { key: 'due_at', label: 'Termin', datetime: true },
+        { key: 'priority', label: 'Öncelik', badge: 'priority' },
+        { key: 'status', label: 'Durum', badge: 'task' },
+        { key: 'assigned_name', label: 'Atanan' }
+      ],
+      fields: [
+        { k: 'title', label: 'Başlık *', req: true },
+        { k: 'assigned_user_id', label: 'Atanan kişi', type: 'user' },
+        { k: 'priority', label: 'Öncelik', type: 'select', options: [['low', 'Düşük'], ['normal', 'Normal'], ['high', 'Yüksek']] },
+        { k: 'status', label: 'Durum', type: 'select', options: [['open', 'Açık'], ['done', 'Tamamlandı']] },
+        { k: 'due_at', label: 'Termin (tarih-saat)', type: 'datetime' },
+        { k: 'remind_at', label: 'Hatırlatma (tarih-saat)', type: 'datetime' },
+        { k: 'related_company_id', label: 'İlgili firma', type: 'company' },
+        { k: 'description', label: 'Açıklama', textarea: true }
+      ],
+      rowActions: [{ label: 'Tamamla', action: 'complete', cls: 'ghost', done: 'Görev tamamlandı', when: function (r) { return r.status === 'open'; } }],
+      hasDetail: false
     }
   };
 
   var cfg = CONFIGS[view] || CONFIGS.companies;
   var companyOptions = null; // firma seçenekleri (lazy)
+  var userOptions = null;    // kullanıcı seçenekleri (lazy)
 
   var BADGES = {
     lead: { new: ['Yeni', 'muted'], contacted: ['İletişim', 'accent'], qualified: ['Nitelikli', 'accent'], won: ['Kazanıldı', 'ok'], lost: ['Kaybedildi', 'bad'] },
-    stage: { new: ['Yeni', 'muted'], qualified: ['Nitelikli', 'accent'], proposal: ['Teklif', 'warn'], won: ['Kazanıldı', 'ok'], lost: ['Kaybedildi', 'bad'] }
+    stage: { new: ['Yeni', 'muted'], qualified: ['Nitelikli', 'accent'], proposal: ['Teklif', 'warn'], won: ['Kazanıldı', 'ok'], lost: ['Kaybedildi', 'bad'] },
+    task: { open: ['Açık', 'accent'], done: ['Tamamlandı', 'ok'] },
+    priority: { low: ['Düşük', 'muted'], normal: ['Normal', 'accent'], high: ['Yüksek', 'bad'] }
   };
+  function fmtDateTime(v) { return v ? String(v).replace('T', ' ').substring(0, 16) : ''; }
+  function ensureUsers(cb) {
+    if (userOptions) { cb(); return; }
+    j('api/crm_tasks.php?action=users').then(function (r) {
+      userOptions = (r && r.ok && r.data) ? r.data : [];
+      cb();
+    }).catch(function () { userOptions = []; cb(); });
+  }
+  function fillUserOptions(sel) {
+    (userOptions || []).forEach(function (u) {
+      var o = document.createElement('option');
+      o.value = u.id;
+      o.textContent = u.full_name || u.username || ('#' + u.id);
+      sel.appendChild(o);
+    });
+  }
   function badge(kind, val) {
     var m = (BADGES[kind] || {})[val] || [val || '—', 'muted'];
     var s = document.createElement('span');
@@ -241,6 +286,12 @@
           op.value = o[0];
           inp.appendChild(op);
         });
+      } else if (f.type === 'user') {
+        inp = el('select');
+        var uo0 = el('option', null, '— Atanmadı —');
+        uo0.value = '';
+        inp.appendChild(uo0);
+        if (userOptions) fillUserOptions(inp);
       } else if (f.type === 'number') {
         inp = el('input');
         inp.type = 'text';
@@ -248,6 +299,9 @@
       } else if (f.type === 'date') {
         inp = el('input');
         inp.type = 'date';
+      } else if (f.type === 'datetime') {
+        inp = el('input');
+        inp.type = 'datetime-local';
       } else {
         inp = el('input');
         inp.type = 'text';
@@ -295,6 +349,7 @@
       formBox._mode.textContent = editingId ? (cfg.title + ' düzenleniyor') : ('Yeni ' + cfg.title.toLowerCase());
       cfg.fields.forEach(function (f) {
         var v = row ? (row[f.k] != null ? row[f.k] : '') : '';
+        if (f.type === 'datetime' && v) { v = fmtDateTime(v).replace(' ', 'T'); }
         inputs[f.k].value = v;
       });
       formBox.classList.remove('hide');
@@ -303,9 +358,16 @@
       var first = cfg.fields[0];
       if (first && inputs[first.k]) inputs[first.k].focus();
     };
+    var chain = render;
     if (cfg.fields.some(function (f) { return f.type === 'company'; })) {
-      ensureCompanyOptions(render);
-    } else { render(); }
+      var afterCompany = chain;
+      chain = function () { ensureCompanyOptions(afterCompany); };
+    }
+    if (cfg.fields.some(function (f) { return f.type === 'user'; })) {
+      var afterUser = chain;
+      chain = function () { ensureUsers(afterUser); };
+    }
+    chain();
   }
 
   function closeForm() {
@@ -371,6 +433,10 @@
       var td = el('td');
       var val = row[c.key];
       if (c.badge) { td.appendChild(badge(c.badge, val || '')); }
+      else if (c.datetime) {
+        td.textContent = fmtDateTime(val) || '—';
+        if (row.overdue == 1 || row.overdue === true) { td.style.color = 'var(--bad)'; td.style.fontWeight = '600'; }
+      }
       else if (c.money) { td.textContent = money(val); td.style.fontVariantNumeric = 'tabular-nums'; }
       else if (c.pct) { td.textContent = (val == null || val === '') ? '—' : (val + '%'); td.style.fontVariantNumeric = 'tabular-nums'; }
       else if (c.num) { td.textContent = val != null ? val : '0'; }
@@ -509,6 +575,29 @@
         });
         card.appendChild(al);
       }
+
+      // Not ekle
+      card.appendChild(el('div', 'crmDetailLabel', 'Not ekle'));
+      var noteWrap = el('div', 'crmNoteBox');
+      var ta = el('textarea');
+      ta.placeholder = 'Bu firmayla ilgili bir not yaz…';
+      var nb = el('button', 'primary', 'Not ekle');
+      nb.type = 'button';
+      nb.onclick = function () {
+        var body = ta.value.trim();
+        if (!body) return;
+        j('api/crm_notes.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'add', related_type: 'company', related_id: co.id, body: body })
+        }).then(function (r) {
+          if (r && r.ok) { toast('Not eklendi'); openDetail(co.id); }
+          else { alert((r && r.message) || 'Not eklenemedi.'); }
+        }).catch(function () { alert('Bağlantı hatası.'); });
+      };
+      noteWrap.appendChild(ta);
+      noteWrap.appendChild(nb);
+      card.appendChild(noteWrap);
 
       detail.appendChild(card);
       detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });

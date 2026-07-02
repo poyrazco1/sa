@@ -35,6 +35,7 @@ function nav_icon(string $name): string
         'lead' => '<path d="M12 2l2.4 5 5.6.6-4.2 3.8 1.2 5.6L12 19.5 6.99 22l1.2-5.6L4 12.6 9.6 12z"/>',
         'opp' => '<path d="M3 17l5-5 4 3 6-7"/><path d="M17 8h4v4"/>',
         'quote' => '<path d="M6 2h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/><path d="M14 2v5h5"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/>',
+        'task' => '<rect x="3" y="4" width="18" height="17" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><path d="M8 13l2 2 4-4"/>',
     ];
     $body = $p[$name] ?? $p['dashboard'];
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' . $body . '</svg>';
@@ -94,6 +95,9 @@ $activeTool = $isTools ? $pwTool : '';
     </a>
     <a class="navItem<?= $pwView === 'quotes' ? ' active' : '' ?>" href="<?= $baseE ?>/index.php?view=quotes">
       <?= nav_icon('quote') ?><span>Teklifler</span>
+    </a>
+    <a class="navItem<?= $pwView === 'tasks' ? ' active' : '' ?>" href="<?= $baseE ?>/index.php?view=tasks">
+      <?= nav_icon('task') ?><span>Görevler</span>
     </a>
   </nav>
   <?php endif; ?>
