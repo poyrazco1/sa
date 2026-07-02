@@ -2,6 +2,18 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../includes/db_migrate.php';
+
+/**
+ * Şema sağlayıcı (self-healing). CRM/RBAC tablolarını ve mevcut tablolara
+ * eklenen bağ kolonlarını gerektiğinde oluşturur. Best-effort: DB hatası
+ * mevcut API akışını kırmaz (schema_version gate ile ilk seferden sonra ucuz).
+ */
+try {
+    db_migrate(db());
+} catch (Throwable $e) {
+    error_log('[db_migrate] ' . $e->getMessage());
+}
 
 /**
  * Panel/API kimlik doğrulaması.

@@ -285,3 +285,255 @@ CREATE TABLE IF NOT EXISTS `print_output_logs` (
     KEY `idx_output_type` (`output_type`),
     KEY `idx_related_log_id` (`related_log_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================================
+-- v80 — CRM + RBAC (login, kullanıcı, rol/yetki, CRM modülleri)
+-- Geriye uyumlu: yeni tablolar IF NOT EXISTS; DROP/TRUNCATE yok.
+-- Mevcut tablolara eklenen kolonlar uygulama tarafında (includes/db_migrate.php)
+-- information_schema kontrollü, güvenli ALTER ile eklenir.
+-- ============================================================
+
+-- --- Roller ---
+CREATE TABLE IF NOT EXISTS `roles` (
+    `code` VARCHAR(40) NOT NULL,
+    `name` VARCHAR(120) NOT NULL,
+    `description` VARCHAR(255) NULL,
+    `sort_order` INT NOT NULL DEFAULT 0,
+    PRIMARY KEY (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `roles` (`code`, `name`, `description`, `sort_order`) VALUES
+('admin',   'Yönetici',   'Tüm yetkiler, kullanıcı ve ayar yönetimi.', 10),
+('manager', 'Müdür',      'CRM tam erişim, tüm kayıtları görür.',       20),
+('sales',   'Temsilci',   'Araçlar + kendi/atanan CRM kayıtları.',       30),
+('viewer',  'Görüntüleyici','Salt okuma.',                              40)
+ON DUPLICATE KEY UPDATE
+    `name` = VALUES(`name`),
+    `description` = VALUES(`description`),
+    `sort_order` = VALUES(`sort_order`);
+
+-- --- Rol yetkileri ---
+CREATE TABLE IF NOT EXISTS `role_permissions` (
+    `role_code` VARCHAR(40) NOT NULL,
+    `permission` VARCHAR(60) NOT NULL,
+    PRIMARY KEY (`role_code`, `permission`),
+    KEY `idx_rp_perm` (`permission`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `role_permissions` (`role_code`, `permission`) VALUES
+('admin','dashboard.view'),('admin','tools.use'),('admin','crm.view'),('admin','crm.edit'),
+('admin','crm.delete'),('admin','records.view_all'),('admin','records.view_own'),
+('admin','admin.settings'),('admin','admin.users'),
+('manager','dashboard.view'),('manager','tools.use'),('manager','crm.view'),('manager','crm.edit'),
+('manager','crm.delete'),('manager','records.view_all'),('manager','records.view_own'),
+('sales','dashboard.view'),('sales','tools.use'),('sales','crm.view'),('sales','crm.edit'),
+('sales','records.view_own'),
+('viewer','dashboard.view'),('viewer','crm.view'),('viewer','records.view_own')
+ON DUPLICATE KEY UPDATE `permission` = VALUES(`permission`);
+
+-- --- Kullanıcılar ---
+CREATE TABLE IF NOT EXISTS `users` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `username` VARCHAR(80) NOT NULL,
+    `email` VARCHAR(190) NULL,
+    `password_hash` VARCHAR(255) NOT NULL,
+    `full_name` VARCHAR(160) NULL,
+    `role_code` VARCHAR(40) NOT NULL DEFAULT 'sales',
+    `is_active` TINYINT(1) NOT NULL DEFAULT 1,
+    `must_change_password` TINYINT(1) NOT NULL DEFAULT 0,
+    `last_login_at` TIMESTAMP NULL DEFAULT NULL,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uniq_username` (`username`),
+    KEY `idx_users_role` (`role_code`),
+    KEY `idx_users_active` (`is_active`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- İlk kurulum admin kullanıcısı.
+-- Kullanıcı adı: admin  —  Parola: Admin1234!  (İLK GİRİŞTE DEĞİŞTİRİLMELİDİR)
+-- Tekrar import'ta parolayı SIFIRLAMAZ (username=username no-op).
+INSERT INTO `users` (`username`, `email`, `password_hash`, `full_name`, `role_code`, `is_active`, `must_change_password`) VALUES
+('admin', NULL, '$2y$12$3C5.fXYUzVxtZtnDJCX8PesIdAXNaJQSmRr3D8lVlUm.K3VGMHfCC', 'Sistem Yöneticisi', 'admin', 1, 1)
+ON DUPLICATE KEY UPDATE `username` = `username`;
+
+-- --- Firmalar ---
+CREATE TABLE IF NOT EXISTS `companies` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(190) NOT NULL,
+    `tax_office` VARCHAR(120) NULL,
+    `tax_no` VARCHAR(40) NULL,
+    `phone` VARCHAR(60) NULL,
+    `email` VARCHAR(190) NULL,
+    `city` VARCHAR(120) NULL,
+    `county` VARCHAR(120) NULL,
+    `address` TEXT NULL,
+    `source` VARCHAR(80) NULL,
+    `owner_user_id` BIGINT UNSIGNED NULL,
+    `created_by` BIGINT UNSIGNED NULL,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_companies_name` (`name`),
+    KEY `idx_companies_owner` (`owner_user_id`),
+    KEY `idx_companies_phone` (`phone`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --- Kişiler ---
+CREATE TABLE IF NOT EXISTS `contacts` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `company_id` BIGINT UNSIGNED NULL,
+    `full_name` VARCHAR(190) NOT NULL,
+    `title` VARCHAR(120) NULL,
+    `phone` VARCHAR(60) NULL,
+    `email` VARCHAR(190) NULL,
+    `note` VARCHAR(255) NULL,
+    `owner_user_id` BIGINT UNSIGNED NULL,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_contacts_company` (`company_id`),
+    KEY `idx_contacts_name` (`full_name`),
+    KEY `idx_contacts_phone` (`phone`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --- Lead (aday) ---
+CREATE TABLE IF NOT EXISTS `leads` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `title` VARCHAR(190) NOT NULL,
+    `company_id` BIGINT UNSIGNED NULL,
+    `contact_id` BIGINT UNSIGNED NULL,
+    `contact_name` VARCHAR(190) NULL,
+    `phone` VARCHAR(60) NULL,
+    `email` VARCHAR(190) NULL,
+    `source` VARCHAR(80) NULL,
+    `status` VARCHAR(30) NOT NULL DEFAULT 'new',
+    `est_value` DECIMAL(18,2) NULL,
+    `currency` VARCHAR(10) NOT NULL DEFAULT 'TL',
+    `owner_user_id` BIGINT UNSIGNED NULL,
+    `note` TEXT NULL,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_leads_status` (`status`),
+    KEY `idx_leads_owner` (`owner_user_id`),
+    KEY `idx_leads_company` (`company_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --- Fırsatlar ---
+CREATE TABLE IF NOT EXISTS `opportunities` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `title` VARCHAR(190) NOT NULL,
+    `company_id` BIGINT UNSIGNED NULL,
+    `contact_id` BIGINT UNSIGNED NULL,
+    `stage` VARCHAR(30) NOT NULL DEFAULT 'new',
+    `amount` DECIMAL(18,2) NULL,
+    `currency` VARCHAR(10) NOT NULL DEFAULT 'TL',
+    `probability` TINYINT UNSIGNED NULL,
+    `expected_close_date` DATE NULL,
+    `owner_user_id` BIGINT UNSIGNED NULL,
+    `lead_id` BIGINT UNSIGNED NULL,
+    `note` TEXT NULL,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_opps_stage` (`stage`),
+    KEY `idx_opps_owner` (`owner_user_id`),
+    KEY `idx_opps_company` (`company_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --- Teklifler ---
+CREATE TABLE IF NOT EXISTS `quotes` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `quote_no` VARCHAR(60) NOT NULL,
+    `opportunity_id` BIGINT UNSIGNED NULL,
+    `company_id` BIGINT UNSIGNED NULL,
+    `contact_id` BIGINT UNSIGNED NULL,
+    `status` VARCHAR(30) NOT NULL DEFAULT 'draft',
+    `currency` VARCHAR(10) NOT NULL DEFAULT 'TL',
+    `subtotal` DECIMAL(18,2) NOT NULL DEFAULT 0,
+    `vat_total` DECIMAL(18,2) NOT NULL DEFAULT 0,
+    `grand_total` DECIMAL(18,2) NOT NULL DEFAULT 0,
+    `valid_until` DATE NULL,
+    `owner_user_id` BIGINT UNSIGNED NULL,
+    `note` TEXT NULL,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uniq_quote_no` (`quote_no`),
+    KEY `idx_quotes_status` (`status`),
+    KEY `idx_quotes_company` (`company_id`),
+    KEY `idx_quotes_opp` (`opportunity_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `quote_items` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `quote_id` BIGINT UNSIGNED NOT NULL,
+    `product_name` VARCHAR(255) NOT NULL,
+    `ws_product_code` VARCHAR(80) NULL,
+    `qty` DECIMAL(12,2) NOT NULL DEFAULT 1,
+    `unit_price` DECIMAL(18,2) NOT NULL DEFAULT 0,
+    `vat_rate` DECIMAL(6,4) NOT NULL DEFAULT 0.20,
+    `line_total` DECIMAL(18,2) NOT NULL DEFAULT 0,
+    `sort_order` INT NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`),
+    KEY `idx_qitems_quote` (`quote_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --- Görevler ---
+CREATE TABLE IF NOT EXISTS `tasks` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `title` VARCHAR(255) NOT NULL,
+    `description` TEXT NULL,
+    `status` VARCHAR(20) NOT NULL DEFAULT 'open',
+    `priority` VARCHAR(20) NOT NULL DEFAULT 'normal',
+    `due_at` DATETIME NULL,
+    `remind_at` DATETIME NULL,
+    `assigned_user_id` BIGINT UNSIGNED NULL,
+    `related_type` VARCHAR(30) NULL,
+    `related_id` BIGINT UNSIGNED NULL,
+    `created_by` BIGINT UNSIGNED NULL,
+    `completed_at` TIMESTAMP NULL DEFAULT NULL,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_tasks_status` (`status`),
+    KEY `idx_tasks_assigned` (`assigned_user_id`),
+    KEY `idx_tasks_due` (`due_at`),
+    KEY `idx_tasks_related` (`related_type`, `related_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --- Notlar ---
+CREATE TABLE IF NOT EXISTS `notes` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `body` TEXT NOT NULL,
+    `related_type` VARCHAR(30) NOT NULL,
+    `related_id` BIGINT UNSIGNED NOT NULL,
+    `user_id` BIGINT UNSIGNED NULL,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_notes_related` (`related_type`, `related_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --- Aktivite / zaman tüneli (audit + CRM feed) ---
+CREATE TABLE IF NOT EXISTS `activities` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `type` VARCHAR(30) NOT NULL DEFAULT 'note',
+    `subject` VARCHAR(255) NULL,
+    `body` TEXT NULL,
+    `related_type` VARCHAR(30) NULL,
+    `related_id` BIGINT UNSIGNED NULL,
+    `user_id` BIGINT UNSIGNED NULL,
+    `occurred_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_act_related` (`related_type`, `related_id`),
+    KEY `idx_act_user` (`user_id`),
+    KEY `idx_act_occurred` (`occurred_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Şema sürüm işareti (uygulama tarafı migration bunu kontrol eder).
+INSERT INTO `app_settings` (`setting_key`, `setting_value`, `value_type`, `description`) VALUES
+('schema_version', '80', 'int', 'Uygulama şema sürümü (CRM/RBAC).')
+ON DUPLICATE KEY UPDATE `setting_value` = VALUES(`setting_value`);
