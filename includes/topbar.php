@@ -1,5 +1,8 @@
 <div class="top">
-    <h1>Akıllı Fiyat Sihirbazı</h1>
+    <div class="brand">
+      <h1>Akıllı Fiyat Sihirbazı</h1>
+      <p class="topSubtitle">Fiyat hesaplama, toplu ürün analizi ve kargo etiketi yönetimi</p>
+    </div>
     <div class="topRight hide" id="topRight">
       <div class="topRates">
         <div class="topRate">Dolar <b id="usdTryRate">Yükleniyor</b></div>

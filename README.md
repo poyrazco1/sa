@@ -1,10 +1,32 @@
-# Akıllı Fiyat Sihirbazı — PHP v78
+# Akıllı Fiyat Sihirbazı — PHP v79
 
 Plain PHP 8.2+ / MySQL (MariaDB 10.6+) / Plesk uyumlu fiyatlama ve kargo etiketi paneli.
 Framework, Composer, Node veya build sistemi **gerektirmez**. ZIP'i sunucuya atıp çalışır.
 
-> Not: Bu README daha önce v70'te kalmıştı; paket sürümü ile eşitlenip güncellendi.
 > Sürüm geçmişi için bkz. [CHANGELOG.md](CHANGELOG.md).
+
+## Arayüz (v79 — yeniden tasarım)
+
+Ekran arayüzü modern bir **B2B SaaS operasyon paneli** olarak yeniden tasarlandı. Tasarım
+tamamen `assets/css/app.css` içindeki bölümlere ayrılmış bir tasarım sistemi + CSS
+değişkenleri (tokens) üzerinden yürür; renk/typografi/spacing/shadow tek yerden yönetilir.
+
+- **Palet:** cool light-gray zemin, tek mavi vurgu (#2563EB) + emerald başarı (#059669);
+  abartılı gradient/neon yok.
+- **Topbar:** başlık + alt açıklama, kompakt kur çipleri ve mini kur çevirici.
+- **Modül geçişi:** segmented tab bar (aktif sekme net).
+- **Fiyat sonucu:** kritik metrikler büyük KPI kartları olarak (satış/net kâr/toplam/kargo).
+- **Toplu Fiyat:** zebra + sticky başlıklı, sağa hizalı tabular sayı içeren data table.
+- **Kargo Etiketi:** form/adım/kayıt ekranları ve T-Soft modalı tek dilde.
+- **Responsive:** 1440 / 1180 / 820 / 520 / 375 kırılımları; mobilde tek kolon, yatay
+  kaydırılabilir tablolar, min 44px dokunmatik hedefler, görünür focus halkaları.
+- **Print/etiket:** A4 / A5 / 10×10 / 15×10 çıktıları, QR ve yüksek kontrast siyah
+  logo/kargo fallback'i içeren `@media print` sistemi **byte düzeyinde AYNEN korundu**.
+  Baskıda arka plan/gölge/gradient kullanılmaz; alıcı adı en baskın alandır.
+
+Bu refactor yalnızca `assets/css/app.css` + `includes/topbar.php` + `includes/header.php`
+dosyalarına dokundu; `assets/js/app.js`, tüm API/PHP mantığı ve DB şeması değişmedi.
+Tüm `id`, `onclick` ve JS bağlantıları korundu.
 
 ---
 
@@ -157,19 +179,40 @@ Kullanıcıları > IP Adresleri alanına eklemen gerekir. Kod tarafında IP uydu
 
 ## 7. Test checklist
 
+**PHP / mantık**
 - [x] Tüm PHP dosyaları `php -l` (25/25 temiz, PHP 8.4 ile doğrulandı).
-- [x] Ana sayfa açılıyor (HTTP 200, tüm modüller render).
-- [x] Fiyat: TL maliyet, %5 kâr, %20 kâr, kredi kartı, havale/EFT senaryoları — doğru.
+- [x] Ana sayfa açılıyor (HTTP 200), kullanıcı seçimi ve modül geçişleri çalışıyor.
+- [x] Fiyat: TL maliyet, %5 kâr, %20 kâr, kredi kartı, havale/EFT — doğru.
 - [x] %5 altı kâr engelleniyor: "Net kâr minimum %5 olmalı."
-- [ ] USD / EUR maliyet ve 30/60 gün vade, 2 taksit: canlı kur API'si gerektirir
-      (üretimde `api/rates.php` üzerinden çalışır).
 - [x] CSRF: dış kökenli POST 403; aynı-köken POST geçer.
+- [ ] USD/EUR maliyet, 30/60 gün vade, 2 taksit: canlı kur API'si gerektirir
+      (üretimde `api/rates.php` üzerinden çalışır).
 - [ ] Toplu fiyat, kargo etiketi CSV/kayıt ve T-Soft canlı testleri: MySQL + canlı
       T-Soft erişimi gerektirir (kod yolları değişmedi).
 
+**Arayüz / responsive (v79)**
+- [x] Fiyat / Toplu Fiyat / Kargo Etiketi ekranları yeni tasarımla render.
+- [x] Fiyat sonuç KPI kartları, ödeme notu ayıraçları, seçili tablo satırı doğru.
+- [x] T-Soft ürün arama modalı (arama, boş durum) doğru.
+- [x] Kargo etiketi önizlemesi (ALICI bloğu, meta kutuları, QR, barkod, gönderici) korunuyor.
+- [x] Responsive: 1440 / 1180 / 820 / 520 / 375 — topbar, nav, formlar, tablo taşması OK.
+- [~] Print A4/A5/10×10/15×10: print CSS byte-identical korundu (fiziksel baskı canlıda test edilmeli).
+
 ---
 
-## 8. Bu sürümde değişen dosyalar (v78)
+## 8. Bu sürümde değişen dosyalar
+
+**v79 (arayüz)**
+
+| Dosya | Değişiklik |
+|-------|-----------|
+| `assets/css/app.css` | Ekran arayüzü yeniden yazıldı (tasarım sistemi); print/label bölümü AYNEN korundu |
+| `includes/topbar.php` | Başlık altına dashboard açıklama satırı eklendi |
+| `includes/header.php` | CSS sürümü `?v=79` |
+
+`assets/js/app.js` ve tüm API/PHP/DB mantığı v79'da **değişmedi**.
+
+**v78 (güvenlik)**
 
 | Dosya | Değişiklik |
 |-------|-----------|
@@ -177,8 +220,6 @@ Kullanıcıları > IP Adresleri alanına eklemen gerekir. Kod tarafında IP uydu
 | `config/tsoft.php` | T-Soft token kaynak koddan çıkarıldı; env/secrets.local'e taşındı |
 | `config/secrets.local.php` | Gerçek sırlar (ZIP'te var, `.gitignore`'da — commit edilmez) |
 | `api/bootstrap.php` | Yazma API'lerine aynı-köken (CSRF) kontrolü eklendi |
-| `api.php` | Root endpoint proje klasörü aday listesi v78'e güncellendi |
-| `README.md` | v78'e güncellendi ve yeniden yapılandırıldı |
-| `CHANGELOG.md` | Eklendi |
+| `api.php` | Root endpoint proje klasörü aday listesi güncellendi |
 
-Hesaplama mantığı, DB şeması, tasarım ve mevcut özellikler **korunmuştur**.
+Hesaplama mantığı, DB şeması ve mevcut özellikler **korunmuştur**.
